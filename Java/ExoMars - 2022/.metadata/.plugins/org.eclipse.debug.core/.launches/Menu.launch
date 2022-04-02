@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
+    <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
+        <listEntry value="/atom-core"/>
+    </listAttribute>
+    <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
+        <listEntry value="4"/>
+    </listAttribute>
+    <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="atom_core.Menu"/>
+    <stringAttribute key="org.eclipse.jdt.launching.MODULE_NAME" value="atom-core"/>
+    <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="atom-core"/>
+</launchConfiguration>

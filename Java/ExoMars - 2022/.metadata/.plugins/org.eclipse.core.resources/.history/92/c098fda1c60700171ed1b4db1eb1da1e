@@ -1,0 +1,68 @@
+package atom_core;
+
+import lejos.hardware.Button;
+import lejos.hardware.lcd.LCD;
+import lejos.hardware.sensor.EV3ColorSensor;
+import lejos.hardware.sensor.EV3UltrasonicSensor;
+import lejos.robotics.SampleProvider;
+
+class Calibration
+  extends Menu
+{
+  public static float[] lettura(EV3ColorSensor sensore)
+  {
+    SampleProvider lettura = sensore.getRGBMode();
+    float[] valori_grezzi = new float[lettura.sampleSize()];
+    lettura.fetchSample(valori_grezzi, 0);
+    
+    return valori_grezzi;
+  }
+  
+  public static float[] lettura(EV3UltrasonicSensor sensore)
+  {
+    SampleProvider lettura = sensore.getDistanceMode();
+    float[] valori_grezzi = new float[lettura.sampleSize()];
+    lettura.fetchSample(valori_grezzi, 0);
+    
+    return valori_grezzi;
+  }
+  
+  public static String[] conversione(float[] valori_grezzi)
+  {
+    String[] valori_finali = new String[3];
+    for (int i = 0; i < 3; i++) {
+      valori_finali[i] = Float.toString(valori_grezzi[i]);
+    }
+    return valori_finali;
+  }
+  
+  public static void printValori(String[] valori, String nome)
+  {
+    LCD.drawString("valori di " + nome, 0, 0);
+    LCD.drawString("RED-GREEN-BLUE", 0, 1);
+    LCD.drawString("--------------", 0, 2);
+    for (int i = 0; i < 3; i++) {
+      LCD.drawString(valori[i], 0, 3 + i);
+    }
+  }
+  
+  public static void play()
+  {
+    while (Button.getButtons() != 32)
+    {
+      String[] valoriFinaliDx = conversione(lettura(sensoreDx));
+      String[] valoriFinaliSx = conversione(lettura(sensoreSx));
+      String[] valoriFinaliP = conversione(lettura(sensoreP));
+      printValori(valoriFinaliDx, "P1");
+      Button.waitForAnyPress();
+      LCD.clear();
+      printValori(valoriFinaliSx, "P4");
+      Button.waitForAnyPress();
+      LCD.clear();
+      printValori(valoriFinaliP, "P2");
+      Button.waitForAnyPress();
+      LCD.clear();
+    }
+    LCD.drawString("USCITA IN CORSO", 0, 4);
+  }
+}

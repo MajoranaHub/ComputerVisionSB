@@ -1,0 +1,245 @@
+package atom_core;
+
+import lejos.hardware.Button;
+import lejos.hardware.Sound;
+import lejos.utility.Delay;
+import lejos.hardware.lcd.LCD;
+import lejos.hardware.sensor.EV3UltrasonicSensor;
+import lejos.robotics.SampleProvider;
+
+public class NewEvacuation
+extends Setup
+{
+	static int timeConstant = 26;
+	static int timeConstantMove = 26;
+	static float[] colorInputR;
+	static float[] colorInputL;
+	static float distance = UltrasonicUtils.getValue(DistanceUP);
+	//static int gyroscopeInput = GyroscopeUtils.getValue(Gyroscope);
+	static boolean bianca = false, nera = false, blackInStart = false;
+	static int redCounter;
+	static int lastAngle = GyroscopeUtils.getValue(Gyroscope);
+	static String lastMove;
+	
+	public static void play() {
+		
+		//quando il robot si trova sullo start si posiziona nella prima colonna e inizia la serpentina
+		redCounter = 1;
+		MovementInterface.move(15, "forw", timeConstant, RMotor, LMotor);
+		MovementInterface.rotate(90, "cw", timeConstant, RMotor, LMotor);
+		lilSnake();
+		
+	}
+	
+	static void lilSnake() {
+		while(Button.getButtons() != Button.ID_ESCAPE) {
+			Gyroscope.reset();
+			
+			colorInputR = ColorUtils.getValues(RColor);
+			colorInputL = ColorUtils.getValues(LColor);
+			
+			//radar con il sensore ultrasuoni
+			
+			for(int i=0; i < 30; i++) {
+				MovementInterface.rotate(1, "cw", timeConstant, RMotor, LMotor);
+				distance = UltrasonicUtils.getValue(DistanceUP);
+				if(distance <= 0.20) takeBall();
+			}
+			
+			MovementInterface.rotate(30, "ccw", timeConstant, RMotor, LMotor);
+			
+			for(int i=0; i < 30; i++) {
+				MovementInterface.rotate(1, "ccw", timeConstant, RMotor, LMotor);
+				distance = UltrasonicUtils.getValue(DistanceUP);
+				if(distance <= 0.20) takeBall();
+			}
+			
+			for(int i=0; i < 20; i++) {
+				MovementInterface.move(1, "forw", timeConstant, RMotor, LMotor);
+				colorInputR = ColorUtils.getValues(RColor);
+				colorInputL = ColorUtils.getValues(LColor);
+				if(ColorUtils.red(colorInputL) && ColorUtils.red(colorInputR)) gira();
+			}
+		}
+	}
+	
+	static void gira() {
+		if(redCounter % 2 == 0) {
+			MovementInterface.move(5, "back", timeConstant, RMotor, LMotor);
+			MovementInterface.rotate(90, "cw", timeConstant, RMotor, LMotor);
+			MovementInterface.move(30, "forw", timeConstant, RMotor, LMotor);
+			MovementInterface.rotate(90, "ccw", timeConstant, RMotor, LMotor);
+			redCounter++;
+		}
+		else {
+			MovementInterface.move(5, "back", timeConstant, RMotor, LMotor);
+			MovementInterface.rotate(90, "ccw", timeConstant, RMotor, LMotor);
+			MovementInterface.move(30, "forw", timeConstant, RMotor, LMotor);
+			MovementInterface.rotate(90, "cw", timeConstant, RMotor, LMotor);
+			redCounter++;
+		}
+	}
+
+	static void takeBall() {
+		//il robot si avvicina alla pallina
+		while(distance < 0.03) {
+			MovementInterface.move(1, "forw", timeConstant, RMotor, LMotor);
+			distance = UltrasonicUtils.getValue(DistanceUP);
+		}
+		
+		MovementInterface.rotate(5, "ccw", timeConstant, RMotor, LMotor);
+		lastAngle = GyroscopeUtils.getValue(Gyroscope); //prende l'angolo
+		colorSensorRotator.rotateTo(90); //da provare
+		colorInputR = ColorUtils.getValues(RColor);
+		
+		if(ColorUtils.silver(colorInputR)) {
+			captureBall();
+			bianca = true;
+			placeBall("silver");	
+		}
+		else if(ColorUtils.black(colorInputR) && bianca) {
+			captureBall();
+			nera = true;
+			placeBall("black");
+		}
+		else if(ColorUtils.black(colorInputR) && !bianca) {
+			captureBall();
+			bringToStart();
+		}
+	}
+	
+	static void captureBall() {
+		ShovelMotor.rotateTo(-200);
+		MovementInterface.move(10, "back", timeConstant, RMotor, LMotor);
+		MovementInterface.rotate(180, "cw", timeConstant, RMotor, LMotor);
+		MovementInterface.move(5, "back", timeConstant, RMotor, LMotor);
+		ShovelMotor.rotateTo(0);
+		MovementInterface.rotate(180, "cw", timeConstant, RMotor, LMotor);
+		
+		//con l'ausilio del giroscopio la macchina si rimette dritta
+		
+		if(lastAngle < 0) MovementInterface.rotate(lastAngle, "cw", timeConstant, RMotor, LMotor);
+		else MovementInterface.rotate(lastAngle, "cw", timeConstant, RMotor, LMotor);	
+	}
+	
+	static void bringToStart() {
+		if(redCounter % 2 == 1)
+		{
+			
+		}
+		else if(redCounter % 2 == 0)
+		{
+			
+		}
+		
+		blackInStart = true;
+	}
+
+
+	static void placeBall(String ballColor) {
+		
+		if(redCounter % 2 == 0) MovementInterface.rotate(180, "cw", timeConstant, RMotor, LMotor);
+		
+		if(redCounter > 1) {
+			MovementInterface.rotate(90, "cw", timeConstant, RMotor, LMotor);
+			MovementInterface.move(30, "forw", timeConstant, RMotor, LMotor);
+			MovementInterface.rotate(90, "ccw", timeConstant, RMotor, LMotor);
+		}
+		
+		//cerca il bordo rosso
+		do {
+			MovementInterface.move(1, "forw", timeConstant, RMotor, LMotor);
+			colorInputR = ColorUtils.getValues(RColor);
+			colorInputL = ColorUtils.getValues(LColor);
+		}while(!ColorUtils.red(colorInputL) && !ColorUtils.red(colorInputR));
+		
+		MovementInterface.move(3, "back", timeConstant, RMotor, LMotor);
+		MovementInterface.rotate(90, "cw", timeConstant, RMotor, LMotor);
+		
+		//cerca il verde
+		do {
+			MovementInterface.move(1, "forw", timeConstant, RMotor, LMotor);
+			colorInputR = ColorUtils.getValues(RColor);
+			colorInputL = ColorUtils.getValues(LColor);
+		}while(!ColorUtils.green(colorInputL) && !ColorUtils.green(colorInputR));
+		
+		if(ballColor == "silver")
+		{	
+			//rilascia pallina argentata
+			MovementInterface.rotate(180, "cw", timeConstant, RMotor, LMotor);
+			ShovelMotor.rotateTo(-200);
+			if(blackInStart) {
+				
+			}
+		}
+		else if(ballColor == "black")
+		{
+			//si sposta nella zona grigia
+			MovementInterface.move(5, "forw", timeConstant, RMotor, LMotor);
+			MovementInterface.rotate(90, "cw", timeConstant, RMotor, LMotor);
+			MovementInterface.move(30, "forw", timeConstant, RMotor, LMotor);
+			
+			//rilascia la pallina
+			MovementInterface.rotate(90, "cw", timeConstant, RMotor, LMotor);
+			ShovelMotor.rotateTo(-200);
+		}
+		
+		MovementInterface.rotate(90, "ccw", timeConstant, RMotor, LMotor);
+		getBacktoSnake();
+	}
+	
+	static void getBacktoSnake() {
+		do {
+			MovementInterface.move(1, "forw", timeConstant, RMotor, LMotor);
+			colorInputR = ColorUtils.getValues(RColor);
+			colorInputL = ColorUtils.getValues(LColor);
+		}while(!ColorUtils.red(colorInputL) && !ColorUtils.red(colorInputR));
+		
+		MovementInterface.rotate(90, "ccw", timeConstant, RMotor, LMotor);
+		
+		do {
+			MovementInterface.move(1, "forw", timeConstant, RMotor, LMotor);
+			colorInputR = ColorUtils.getValues(RColor);
+			colorInputL = ColorUtils.getValues(LColor);
+		}while(!ColorUtils.silver(colorInputL) && !ColorUtils.silver(colorInputR));
+		
+		MovementInterface.move(5, "back", timeConstant, RMotor, LMotor);
+		MovementInterface.rotate(180, "ccw", timeConstant, RMotor, LMotor);
+		
+		if(redCounter == 1) 
+		{
+			MovementInterface.rotate(90, "cw", timeConstant, RMotor, LMotor);
+		}
+		else if(redCounter == 2)
+		{
+			MovementInterface.rotate(90, "cw", timeConstant, RMotor, LMotor);
+			do {
+				MovementInterface.move(1, "forw", timeConstant, RMotor, LMotor);
+				colorInputR = ColorUtils.getValues(RColor);
+				colorInputL = ColorUtils.getValues(LColor);
+			}while(!ColorUtils.red(colorInputL) && !ColorUtils.red(colorInputR));
+			MovementInterface.rotate(90, "ccw", timeConstant, RMotor, LMotor);
+			MovementInterface.move(30, "forw", timeConstant, RMotor, LMotor);
+			MovementInterface.rotate(90, "ccw", timeConstant, RMotor, LMotor);
+		}
+		else if(redCounter == 3)
+		{
+			MovementInterface.move(60, "forw", timeConstant, RMotor, LMotor);
+			MovementInterface.rotate(90, "cw", timeConstant, RMotor, LMotor);
+		}
+		else if(redCounter == 4)
+		{
+			MovementInterface.rotate(90, "cw", timeConstant, RMotor, LMotor);
+			do {
+				MovementInterface.move(1, "forw", timeConstant, RMotor, LMotor);
+				colorInputR = ColorUtils.getValues(RColor);
+				colorInputL = ColorUtils.getValues(LColor);
+			}while(!ColorUtils.red(colorInputL) && !ColorUtils.red(colorInputR));
+			MovementInterface.rotate(90, "ccw", timeConstant, RMotor, LMotor);
+			MovementInterface.move(90, "forw", timeConstant, RMotor, LMotor);
+			MovementInterface.rotate(90, "ccw", timeConstant, RMotor, LMotor);
+		}
+		
+		lilSnake();
+	}
+}

@@ -1,0 +1,271 @@
+//ho inserito il caso "Affronta ostacolo"(proabilmente errato per colpa dei valori)
+
+package atom_core;
+import lejos.hardware.lcd.LCD;
+import lejos.hardware.motor.EV3LargeRegulatedMotor;
+import lejos.hardware.Button;
+import lejos.utility.Delay;
+import lejos.hardware.Sound;
+
+class Core extends Menu{
+	static void impostazioni() {							//qui ci sono tutte le impostazioni dei valori
+		mDx.setSpeed(300);									//impostazioni velocità motori
+		mSx.setSpeed(300);
+		mDx.setAcceleration(7000);
+		mSx.setAcceleration(7000);
+	}
+	
+	static boolean isGreen(float lettura[]) {		
+		float differenza;
+		differenza = lettura[1] - lettura[0];
+		if(lettura[1] >= 0.1) return false;
+		else {
+			if(differenza > 0.035) return true;
+			else return false;
+		}
+	}
+	
+	static void ruota(EV3LargeRegulatedMotor m1, EV3LargeRegulatedMotor m2, int gradi, int modalita) {	
+
+		//modalita: 1 destra , 2 sinistra.
+		
+		int n_volte= gradi;
+		int velocita = 200;
+		
+//		m1.backward();
+//		m2.backward();
+//		Delay.msDelay(200);
+//		m1.flt(true);
+//		m2.flt();
+		
+		final int costanteDx = 60;
+		final int costanteSx = 60;
+		
+		switch(modalita){
+		
+		case 1:
+			m2.setSpeed(velocita - costanteSx);
+			m1.setSpeed(velocita + costanteDx);
+		break;
+		case 2: 
+			m1.setSpeed(velocita + costanteSx);
+			m2.setSpeed(velocita - costanteDx);
+		break;
+		}
+		
+		for(int volte =0; volte<=n_volte; volte++){
+			switch(modalita){
+			
+			case 1:
+				m2.forward();
+				m1.backward();
+			break;
+			case 2:
+				m1.forward();
+				m2.backward();
+			break;
+	
+			default:
+			}
+			Delay.msDelay(33);
+		}
+		m1.flt(true);
+		m2.flt();
+	}
+	
+	static void ruota2(EV3LargeRegulatedMotor m1, EV3LargeRegulatedMotor m2, int rotazione1, int rotazione2, int velocita) {
+		final int costanteDx = 60;
+		final int costanteSx = 60;
+		
+		if(rotazione1 > rotazione2) {
+			m1.setSpeed(velocita - costanteSx);
+			m2.setSpeed(velocita + costanteDx);
+		} else {
+			m1.setSpeed(velocita + costanteSx);
+			m2.setSpeed(velocita - costanteDx);
+		}
+		
+		m1.rotate(rotazione1, true);
+		m2.rotate(rotazione2);
+	}
+	
+	static void avantidi(int potenza, int modalita, int mm) {
+		//1 avanti, 2 dietro
+		
+		mDx.setSpeed(potenza);
+		mSx.setSpeed(potenza);
+		
+		int tempoms = mm*17;
+		
+		switch(modalita){
+		
+		case 1:
+			mDx.forward();
+			mSx.forward();
+		break;
+		case 2: 
+			mDx.backward();
+			mSx.backward();
+		break;
+		}
+		Delay.msDelay(tempoms);
+		mDx.flt(true);
+		mSx.flt();
+	}
+	
+	static void muovi(EV3LargeRegulatedMotor m1, int potenza, int modalita) {
+		
+		m1.setSpeed(potenza);
+		//modalita: 1 avanti , 2 dietro, 0 stop
+		
+		switch(modalita){
+		
+		case 1:
+			m1.forward();
+		break;
+		case 2: 
+			m1.backward();
+		break;
+		case 0:
+			m1.flt(true);
+		break;
+		}
+	}
+	
+	static boolean isblack(float[] lettura) {
+		if(lettura[0] < 0.12 && lettura[1] < 0.12 && lettura[2] < 0.12) return true;
+		else return false;
+	}
+	
+	static boolean confronto(float[] colore, float lettura[]) {
+		if(Math.abs(colore[0] - lettura[0])<=0.16 && Math.abs(colore[1] - lettura[1]) <= 0.16 && Math.abs(colore[2] - lettura[2]) <= 0.16) {
+			return true;
+		} else {
+			return false;
+		}		
+	}
+	
+	static void inserisci() {
+		
+	}
+	
+	public static void play() {								//funzione principale della classe		
+		boolean premuto = false;							//variabile per iniziare il programma
+		float[] bianco = {(float)0.2, (float)0.2 ,(float)0.2};		//<--valori casuali da cambiare e calibrare
+		float[] verde = {(float)0.2, (float)0.7 ,(float)0.2};		///////
+		float[] argento = {(float)5.0, (float)5.0, (float)5.0};
+		String direzione = "";
+		String direzione_old = "";
+		impostazioni();										//caricamento impostazioni
+		
+		Sound.beepSequenceUp();
+		LCD.drawString("INVIO PER INIZIARE", 0, 4);
+		
+		while(!premuto) {									//attesa per l'avvio del programma
+			if(Button.getButtons() == Button.ID_ENTER) {
+				premuto = true;
+				LCD.clear();
+			}
+		}
+		
+		float[] letturaSsx =  Calibration.lettura(sensoreSx);
+		float[] letturaSdx =  Calibration.lettura(sensoreDx);
+		
+		while(Button.getButtons() != Button.ID_ESCAPE && !confronto(letturaSsx, argento)) {			
+			letturaSsx = Calibration.lettura(sensoreSx);
+			letturaSdx = Calibration.lettura(sensoreDx);	
+			
+			LCD.drawString(direzione_old, 0, 3);
+			LCD.drawString(direzione, 0, 4);
+			
+			if(isGreen(letturaSsx)) {
+				avantidi(200, 1, 65);
+				ruota(mDx, mSx, 30, 2);
+				direzione_old = direzione;
+				direzione = "sinistra";
+			}
+
+			else if(isGreen(letturaSdx)) {
+				avantidi(200, 1, 65);
+				ruota(mDx, mSx, 30, 1);
+				direzione_old = direzione;
+				direzione = "destra";
+			}
+			
+			else if(confronto(letturaSdx, bianco) && confronto(letturaSsx, bianco)) {		
+				muovi(mDx, 200, 1);
+				muovi(mSx, 200, 1);
+				direzione_old = direzione;
+				direzione = "dritto";
+			}
+			
+			else if(confronto(letturaSdx, bianco) && isblack(letturaSsx)){		//gira a sinistra
+//				if(direzione_old == direzione && direzione_old != "") {
+					
+					while(confronto(letturaSdx, bianco) && isblack(letturaSsx)) {
+						ruota(mDx, mSx, 8, 2);
+						letturaSsx = Calibration.lettura(sensoreSx);
+						letturaSdx = Calibration.lettura(sensoreDx);
+					}
+					
+					if(confronto(letturaSsx, bianco) && isblack(letturaSdx)) {
+						avantidi(200, 1, 10);
+					}
+					if(isblack(letturaSdx) && isblack(letturaSsx)) {
+						ruota(mDx, mSx, 30, 2);
+					}
+					
+					direzione_old = direzione;
+					direzione ="sx";
+//				}
+			}
+			
+			else if(confronto(letturaSsx, bianco) && isblack(letturaSdx)){		//gira a destra
+//				if(direzione_old == direzione && direzione_old != "") {
+					while(confronto(letturaSsx, bianco) && isblack(letturaSdx)) {
+						ruota(mDx, mSx, 8, 1);
+						letturaSsx = Calibration.lettura(sensoreSx);
+						letturaSdx = Calibration.lettura(sensoreDx);
+					}
+					
+					if(confronto(letturaSdx, bianco) && isblack(letturaSsx)) {
+						avantidi(200, 1, 10);
+					} 
+					if(isblack(letturaSdx) && isblack(letturaSsx)) {
+						ruota(mDx, mSx, 30, 1);
+					}
+					
+					direzione_old = direzione;
+					direzione ="dx";
+//				}
+			}
+			
+			else if(isblack(letturaSsx) && isblack(letturaSdx)){
+				avantidi(200, 1, 40);
+				direzione_old = direzione;
+				direzione = "dritto";
+			}
+			
+			else {
+				avantidi(200, 1, 40);
+			}
+//			
+//			if(curveDx >= 3) {
+//				ruota2(mDx, mSx, -181, 210, 200);
+//				curveDx = 0;
+//			}
+//			
+//			if(curveSx >= 3) {
+//				ruota2(mDx, mSx, 210, -181, 200);
+//				curveSx = 0;
+//			}
+		}
+		
+		Sound.twoBeeps();
+		while(confronto(letturaSsx, argento)) {
+			
+			
+		}
+		
+	}
+}

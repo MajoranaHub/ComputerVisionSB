@@ -1,0 +1,34 @@
+package atom_core;
+
+import lejos.hardware.Button;
+import lejos.hardware.lcd.LCD;
+import lejos.hardware.motor.EV3LargeRegulatedMotor;
+import lejos.hardware.motor.EV3MediumRegulatedMotor;
+import lejos.hardware.port.SensorPort;
+import lejos.hardware.port.MotorPort;
+import lejos.hardware.sensor.EV3ColorSensor;
+import lejos.hardware.sensor.EV3UltrasonicSensor;
+import lejos.utility.Delay;
+
+public class Test 
+extends Setup{
+	public static void play()
+	{
+		while(Button.getButtons() != Button.ID_ESCAPE)
+		 {
+			/*MovementInterface.rotate(70, "ccw", RMotor, LMotor);//70 gradi sono 90 con la pala alzata
+			Delay.msDelay(1000);
+			ShovelMotor.rotateTo(-210);//perfetto per abbassare la pala
+			Delay.msDelay(1000);
+			ShovelMotor.rotateTo(0); //perfetto per alzare la pala
+			Delay.msDelay(1000);
+			MovementInterface.rotate(61, "ccw", RMotor, LMotor);//61 gradi sono 90 con la pala abbassata 
+			Delay.msDelay(5000);*/
+			
+			DropMotor.rotateTo(180);
+			Button.waitForAnyPress();
+			DropMotor.rotateTo(0);
+			Button.waitForAnyPress();
+		 }
+	}
+}

@@ -1,0 +1,426 @@
+package atom_core;
+
+import lejos.hardware.Button;
+import lejos.hardware.Sound;
+import lejos.hardware.lcd.LCD;
+import lejos.utility.Delay;
+
+class Core
+  extends Setup
+{ 
+	//Variabili utilizzate per contenere i valori rilevati dalla lettura dei sensori
+	static float[] colorInputR;
+	
+  public static void play()
+  {
+	 Sound.playTone(550, 500);
+	 LCD.drawString("---Running---", 0, 3);
+	 
+	 //Variabile per errori curve
+	 boolean error = true;
+	 
+	 //timeConstant
+	 int timeConstant = 26;
+	 int timeConstantMove = 26;
+	 
+	 //Variabili utilizzate per contenere i valori rilevati dalla lettura dei sensori
+	 float[] colorInputL;
+	 float ultrasonicUPInput;
+	 int gyroValue;
+	 
+	 //Variabili utilizzate per fixare il gap
+	 int whiteCounter = 0;
+	 int searchCounter = 0;
+	 String gapRotation;
+	 String lastMoveGap = "start";
+	 
+	 //Controllo green-green
+	 boolean greenCheck = true;
+	 
+	 //Contatore cicli silver-random
+	 int silverCount = 0;  
+	 
+	 //Costante relativa alla velocità da utilizzare nelle curve
+	 final int steeringSpeed = 180;//da diminuire
+	 
+	 /*Variabile utilizzata per memorizzare l'ultima mossa effettuata, aiuta a risolvere le ambiguità generate
+	  *dal caso NERO-NERO*/
+	 
+	 //f-r-l forward, right, left
+	 String lastMove = "";
+	 
+	 //Loop principale di esecuzione, si ripete finché non viene premuto il tasto di uscita
+	 while(Button.getButtons() != Button.ID_ESCAPE)
+	 {
+		 //Lettura dei valori dei sensori tramite le "librerie" ColorUtils e UltrasonicUtils
+		 colorInputR = ColorUtils.getValues(RColor);
+		 colorInputL = ColorUtils.getValues(LColor);
+		 ultrasonicUPInput = UltrasonicUtils.getValue(DistanceUP);
+		 greenCheck = true;
+		 
+		 //In questa parte sono gestiti tutti i casi possibili in relazione ai valori rilevati dai sensori
+		 
+		 /*Ostacolo, viene superato girando alla sua destra, caso attivato quando la distanza del sensore ultrasuoni
+		  *è minore di 5.5cm*/
+		 if(ultrasonicUPInput < 0.06)
+		 {
+			 Sound.beepSequence();
+			 
+			 LCD.drawString("ostacolo", 0, 5);
+			 		
+			 MovementInterface.rotate(70, "cw", timeConstant, RMotor, LMotor);
+			 
+			 MovementInterface.move(90, "forw", timeConstantMove, RMotor, LMotor);
+			 MovementInterface.rotate(70, "ccw", timeConstant, RMotor, LMotor);
+			 
+			 MovementInterface.move(140, "forw", timeConstantMove, RMotor, LMotor);
+			 
+			 MovementInterface.rotate(50, "ccw", timeConstant, RMotor, LMotor);
+
+			 do {
+				 MovementInterface.move(1, "forw", timeConstantMove, RMotor, LMotor);
+				 colorInputR = ColorUtils.getValues(RColor);
+			 } while(ColorUtils.white(colorInputR));
+			 
+			 MovementInterface.move(10, "forw", timeConstantMove, RMotor, LMotor);
+			 
+			 /*In questo ciclo il robot ritorna verso sinistra e continua in quella direzione finché non ritrova la linea
+			  *e successivamente ritorna in allineamento con la linea*/
+			 do {
+				 MovementInterface.rotate(1, "cw", timeConstant, RMotor, LMotor);
+				 colorInputL = ColorUtils.getValues(LColor);
+			 } while(ColorUtils.white(colorInputL));
+			 
+			 LCD.clear(5);
+			 
+			 Sound.beepSequenceUp();
+		 } 
+		 
+		 //White-White
+		 else if(ColorUtils.white(colorInputR) && ColorUtils.white(colorInputL))
+		 {		
+			 whiteCounter++;
+			 LCD.drawString(Float.toString(whiteCounter), 0, 3);
+			 LCD.drawString("white-white", 0, 4);
+			 timeConstantMove = 15;
+			 MovementInterface.move(1, "forw", timeConstantMove, RMotor, LMotor);
+			 timeConstantMove = 26;
+			 lastMove = "f";
+			 LCD.clear();
+			 
+			 if (whiteCounter > 125)
+				{
+				 do{
+					if (lastMoveGap == "start") break;
+					else if (lastMoveGap == "l") gapRotation = "ccw";
+					else gapRotation = "cw";
+					
+					Gyroscope.reset();
+					do{
+						MovementInterface.rotate(1, gapRotation, timeConstant, RMotor, LMotor);
+						colorInputR = ColorUtils.getValues(RColor);
+						colorInputL = ColorUtils.getValues(LColor);
+						if (ColorUtils.black(colorInputR) || ColorUtils.black(colorInputL)) break;
+						gyroValue = GyroscopeUtils.getValue(Gyroscope);
+						if (gyroValue < 0) gyroValue *= -1;
+					}while(gyroValue < 45 && !(ColorUtils.black(colorInputR) || ColorUtils.black(colorInputL)));
+					
+					if (!(ColorUtils.black(colorInputR) || ColorUtils.black(colorInputL))){
+						do {
+							MovementInterface.move(1, "forw", timeConstantMove, RMotor, LMotor);
+							colorInputR = ColorUtils.getValues(RColor);
+							colorInputL = ColorUtils.getValues(LColor);
+							searchCounter++;
+						} while(ColorUtils.white(colorInputR) &&  ColorUtils.white(colorInputL) && searchCounter < 70);
+					}
+					
+					if (searchCounter == 70)
+					{
+						if (gapRotation == "cw") gapRotation = "ccw";
+						else gapRotation = "cw";
+						
+						Gyroscope.reset();
+						do{
+							MovementInterface.rotate(1, gapRotation, timeConstant, RMotor, LMotor);
+							colorInputR = ColorUtils.getValues(RColor);
+							colorInputL = ColorUtils.getValues(LColor);
+							if (ColorUtils.black(colorInputR) || ColorUtils.black(colorInputL)) break;
+							gyroValue = GyroscopeUtils.getValue(Gyroscope);
+							if (gyroValue < 0) gyroValue *= -1;
+						}while(gyroValue < 80);
+						
+						do {
+							MovementInterface.move(1, "forw", timeConstantMove, RMotor, LMotor);
+							colorInputR = ColorUtils.getValues(RColor);
+							colorInputL = ColorUtils.getValues(LColor);
+						} while(ColorUtils.white(colorInputR) &&  ColorUtils.white(colorInputL));
+					}
+					
+					searchCounter = 0;
+					
+				  }while(false);
+				}
+		 }
+		 
+		 //White-Black
+		 else if(ColorUtils.white(colorInputR) && ColorUtils.black(colorInputL))
+		 {
+			 whiteCounter = 0;
+			 //Qui viene effettuato il cambio di velocità per le curve
+			 RMotor.setSpeed(steeringSpeed);
+			 LMotor.setSpeed(steeringSpeed);
+
+			 LCD.drawString("white-black", 0, 4);
+			 timeConstant = 32;
+			 MovementInterface.rotate(1, "ccw", timeConstant, RMotor, LMotor);
+			 timeConstant = 26;
+			 
+			 /*Nei casi con un nero ed un bianco la nuova azione viene memorizzata solo se quella precedente è stata quella
+			  *di andare avanti, questo per ridurre i casi in cui un ambiguità di tipo NERO-NERO venga risolta andando in
+			  *direzione opposta a quella corretta*/
+			 if(lastMove == "f") lastMove = "l";
+			 lastMoveGap = "l";
+			 LCD.clear();
+			 
+			 //Dopo aver eseguito la curva reimposta la velocità dei motori al valore originale
+			 RMotor.setSpeed(250);
+			 LMotor.setSpeed(250);
+		 }
+		 
+		 //Black-White
+		 else if(ColorUtils.black(colorInputR) && ColorUtils.white(colorInputL))
+		 {
+			whiteCounter = 0; 
+			RMotor.setSpeed(steeringSpeed);
+			LMotor.setSpeed(steeringSpeed);
+			
+			LCD.drawString("black-white", 0, 4);
+			timeConstant = 32;
+			MovementInterface.rotate(1, "cw", timeConstant, RMotor, LMotor);
+			timeConstant = 26;
+			
+			if(lastMove == "f") lastMove = "r";
+			lastMoveGap = "r";
+			RMotor.setSpeed(250);
+			LMotor.setSpeed(250);
+		 }
+		 
+		 //Black-Black
+		 else if(ColorUtils.black(colorInputR) && ColorUtils.black(colorInputL))
+		 {
+			 /*Il caso NERO-NERO è gestito come un'ambiguità in quanto potrebbe essere generato da un incrocio oppure da
+			  *una curva stretta. L'ambiguità viene risolta tramite l'utilizzo della variabile "lastMove" che contiene
+			  *l'ultima azione eseguita*/
+			 LCD.drawString("black-black", 0, 4);
+			 
+			 //Nel caso in cui l'azione precedente sia stata quella di girare ad una curva, si gira in direzione di quella curva
+			 if(lastMove == "r" || lastMove == "f")
+			 {
+				 /*Prima di intraprendere la curva, c'è una breve rotazione nella direzione opposta. Questa azione funge da
+				  *ulteriore sistema di controllo su eventuali fraintendimenti in quanto, così facendo, si evitano casi in cui
+				  *un incrocio preso male venga frainteso per una curva in quanto l'ipotetica linea dritta viene rilevata*/
+				 Gyroscope.reset();
+				 LCD.drawString("Curva a destra", 0, 5);
+				 MovementInterface.move(45, "forw", timeConstantMove, RMotor, LMotor);
+				 MovementInterface.rotate(31, "ccw", timeConstant, RMotor, LMotor);
+				 
+				 do {
+					 MovementInterface.rotate(1, "cw", timeConstant, RMotor, LMotor);
+					 colorInputR = ColorUtils.getValues(RColor);
+					 colorInputL = ColorUtils.getValues(LColor);
+					 if (GyroscopeUtils.getValue(Gyroscope) < -135) error = false;
+				 } while((!ColorUtils.black(colorInputR) && !ColorUtils.black(colorInputL)) && error);
+				 lastMoveGap = "r";
+				 if (!error)
+				 {
+					 do {
+						 MovementInterface.rotate(1, "ccw", timeConstant, RMotor, LMotor);
+						 colorInputR = ColorUtils.getValues(RColor);
+						 colorInputL = ColorUtils.getValues(LColor);
+					 } while((!ColorUtils.black(colorInputR) && !ColorUtils.black(colorInputL)));
+					 lastMoveGap = "l";
+					 error = true;
+				 }
+				 
+				 MovementInterface.rotate(2, "cw", timeConstant, RMotor, LMotor);
+				 
+				 LCD.clear(5);
+			 }
+			 
+			 else if(lastMove == "l")
+			 {
+				 Gyroscope.reset();
+				 LCD.drawString("Curva a sinistra", 0, 5);
+				 MovementInterface.move(45, "forw", timeConstantMove, RMotor, LMotor);
+				 MovementInterface.rotate(31, "cw", timeConstant, RMotor, LMotor);
+				 
+				 do {
+					 MovementInterface.rotate(1, "ccw", timeConstant, RMotor, LMotor);
+					 colorInputL = ColorUtils.getValues(LColor);
+					 colorInputR = ColorUtils.getValues(RColor);
+					 if (GyroscopeUtils.getValue(Gyroscope) > 135) error = false;
+				 } while((!ColorUtils.black(colorInputL) && !ColorUtils.black(colorInputR)) && error);
+				 lastMoveGap = "l";
+				 if (!error)
+				 {
+					 do {
+						 MovementInterface.rotate(1, "cw", timeConstant, RMotor, LMotor);
+						 colorInputR = ColorUtils.getValues(RColor);
+						 colorInputL = ColorUtils.getValues(LColor);
+					 } while((!ColorUtils.black(colorInputR) && !ColorUtils.black(colorInputL)));
+					 lastMoveGap = "r";
+					 error = true;
+				 }
+				 
+				 MovementInterface.rotate(2, "ccw", timeConstant, RMotor, LMotor);
+				 
+				 LCD.clear(5);
+			 }
+			 LCD.clear();
+		 }
+		 
+		//silver-silver
+		 else if(ColorUtils.silver(colorInputL) || ColorUtils.silver(colorInputR)){
+			 //Se l'argento viene rilevato da entrambe i sensori passa direttamente alla zona di evacuazione
+			 
+			 colorInputL = ColorUtils.getValues(LColor);
+			 colorInputR = ColorUtils.getValues(RColor);
+			 if(ColorUtils.silver(colorInputL) && ColorUtils.silver(colorInputR))
+			 {
+				 Sound.twoBeeps();
+			 }
+			 //Se solo uno dei due sensori rileva l'argento allora significa che la linea è stata raggiunta di sbiego e quindi riaddrizza
+			 else if(ColorUtils.silver(colorInputL)) 
+			 {
+				 Sound.beepSequenceUp();
+				 do {
+					 MovementInterface.rotate(1, "ccw", timeConstant, RMotor, LMotor);
+					 colorInputR = ColorUtils.getValues(RColor);
+					 silverCount += 1;
+				 } while(!ColorUtils.silver(colorInputR) && silverCount <= 5);
+			 }
+			 else if(ColorUtils.silver(colorInputR))
+			 {
+				 Sound.beepSequence();
+				 
+				 do {
+					 MovementInterface.rotate(1, "cw", timeConstant, RMotor, LMotor);
+					 colorInputL = ColorUtils.getValues(LColor);
+					 silverCount += 1;
+				 } while(!ColorUtils.silver(colorInputL) && silverCount <= 5);
+			 }
+			 if (silverCount != 6)
+			 {			 
+				 silverCount = 0;
+				 EvacuationZone.play();
+			 }
+			 silverCount = 0;
+		 }
+		 
+		//Random-Green
+		 else if(ColorUtils.green(colorInputR) && !ColorUtils.green(colorInputL))
+		 {			 
+			LCD.drawString("random-green", 0, 4);
+			/*LCD.drawString(Float.toString(colorInputR[0]), 0, 1);
+			LCD.drawString(Float.toString(colorInputR[1]), 0, 2);
+			LCD.drawString(Float.toString(colorInputR[2]), 0, 3);
+			Button.waitForAnyPress();*/
+			
+			//Controllo green-green
+			MovementInterface.move(2, "forw", timeConstantMove, RMotor, LMotor);
+			Delay.msDelay(200);
+			colorInputL = ColorUtils.getValues(LColor);
+			if (ColorUtils.green(colorInputL)) greenCheck = false;
+			MovementInterface.rotate(4, "cw", timeConstant, RMotor, LMotor);
+			Delay.msDelay(200);
+			colorInputL = ColorUtils.getValues(LColor);
+			if (ColorUtils.green(colorInputL)) greenCheck = false;
+			MovementInterface.rotate(8, "ccw", timeConstant, RMotor, LMotor);
+			Delay.msDelay(200);
+			colorInputL = ColorUtils.getValues(LColor);
+			if (ColorUtils.green(colorInputL)) greenCheck = false;
+			MovementInterface.rotate(5, "cw", timeConstant, RMotor, LMotor);
+			
+			if(greenCheck)
+			{
+				//Prima della curva viene fatto un lieve spostamento in avanti per adattarsi a tutti i tipi di curva con verde
+				MovementInterface.move(25, "forw", timeConstantMove, RMotor, LMotor);
+				MovementInterface.rotate(6, "cw", timeConstant, RMotor, LMotor);
+				do {
+					MovementInterface.rotate(2, "cw", timeConstant, RMotor, LMotor);
+					
+					colorInputR = ColorUtils.getValues(RColor);
+				} while(!ColorUtils.black(colorInputR));
+				lastMoveGap = "l";
+				LCD.clear();
+			}
+			else DoubleGreen();
+		 }
+		 
+		 //Green-Random
+		 else if(ColorUtils.green(colorInputL) && !ColorUtils.green(colorInputR))
+		 {
+			 LCD.drawString("green-random", 0, 4);
+				/*LCD.drawString(Float.toString(colorInputL[0]), 0, 1);
+				LCD.drawString(Float.toString(colorInputL[1]), 0, 2);
+				LCD.drawString(Float.toString(colorInputL[2]), 0, 3);
+				Button.waitForAnyPress();*/ 
+			 
+			//Controllo green-green
+			MovementInterface.move(2, "forw", timeConstantMove, RMotor, LMotor);
+			Delay.msDelay(200);
+			colorInputR = ColorUtils.getValues(RColor);
+			if (ColorUtils.green(colorInputR)) greenCheck = false;
+			MovementInterface.rotate(4, "cw", timeConstant, RMotor, LMotor);
+			Delay.msDelay(200);
+			colorInputR = ColorUtils.getValues(RColor);
+			if (ColorUtils.green(colorInputR)) greenCheck = false;
+			MovementInterface.rotate(8, "ccw", timeConstant, RMotor, LMotor);
+			Delay.msDelay(200);
+			colorInputR = ColorUtils.getValues(RColor);
+			if (ColorUtils.green(colorInputR)) greenCheck = false;
+			MovementInterface.rotate(5, "cw", timeConstant, RMotor, LMotor);
+			
+			if(greenCheck)
+			{
+				MovementInterface.move(25, "forw", timeConstantMove, RMotor, LMotor);
+				MovementInterface.rotate(6, "ccw", timeConstant, RMotor, LMotor);			 
+				do {
+					MovementInterface.rotate(2, "ccw", timeConstant, RMotor, LMotor);
+					
+					colorInputL = ColorUtils.getValues(LColor);
+				} while(!ColorUtils.black(colorInputL));
+				lastMoveGap = "r";
+				LCD.clear();
+			}
+			else DoubleGreen();	
+		 }
+		 
+		 //Green-Green
+		 else if(ColorUtils.green(colorInputL) && ColorUtils.green(colorInputR)){
+			 DoubleGreen();
+		 }
+			 
+		 
+		 
+	 }//Instruction loop
+	 
+	 LCD.clear();
+	 Sound.playTone(330, 500);
+  }
+  
+  public static void DoubleGreen(){
+	  LCD.drawString("green-green", 0, 4);
+		 /*Viene effettuata una rotazione iniziale per evitare di incorrere nella linea nera perpendicolare a quella su cui
+		  *si trova il robot*/
+		 MovementInterface.rotate(90, "cw", 26, RMotor, LMotor);
+		 
+		 //Successivamente continua la rotazione in maniera dinamica, cioè fermandosi quando incontra la linea nera da cui è arrivato
+		 do{
+			 MovementInterface.rotate(5, "cw", 26, RMotor, LMotor);
+			 colorInputR = ColorUtils.getValues(RColor);
+		 }while(ColorUtils.white(colorInputR));
+		 LCD.clear();
+  }
+  
+}

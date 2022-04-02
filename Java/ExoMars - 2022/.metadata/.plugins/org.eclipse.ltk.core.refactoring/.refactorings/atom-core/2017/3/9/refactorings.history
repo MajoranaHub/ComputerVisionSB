@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring accessors="true" comment="Delete element from project &apos;atom-core&apos;&#x0D;&#x0A;- Original project: &apos;atom-core&apos;&#x0D;&#x0A;- Original element: &apos;atom_core.Core2.java&apos;" description="Delete element" element1="/src&lt;atom_core{Core2.java" elements="1" flags="589830" id="org.eclipse.jdt.ui.delete" resources="0" stamp="1488546348717" subPackages="false" version="1.0"/>
+</session>

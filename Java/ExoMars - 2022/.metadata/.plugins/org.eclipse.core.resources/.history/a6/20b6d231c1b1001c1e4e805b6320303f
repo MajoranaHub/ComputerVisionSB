@@ -1,0 +1,52 @@
+package atom_core;
+
+import java.net.*;
+import java.util.*;
+
+import lejos.hardware.Button;
+import lejos.hardware.lcd.LCD;
+
+import java.nio.charset.StandardCharsets;
+import java.io.*;
+
+
+public class Client extends Setup{
+	public static void start() throws IOException{
+		Socket serverSocket = new Socket("10.0.1.2", 1500);
+		//System.out.println("Connesso a " + serverSocket);
+		String lastMove = "back";
+		String inMsg = "back";
+		while(true) {
+			LCD.clear();
+			
+			OutputStream outputStream = serverSocket.getOutputStream();
+			DataOutputStream dout = new DataOutputStream(outputStream);
+			
+			BufferedReader inBuffer = new BufferedReader(new InputStreamReader(serverSocket.getInputStream(), StandardCharsets.UTF_8));
+			
+			if (inBuffer.ready()) {
+				inMsg = inBuffer.readLine();
+				LCD.clear();
+				LCD.drawString(inMsg, 0, 3);
+				//Button.waitForAnyPress();
+				lastMove = inMsg;
+				dout.writeUTF("ack");
+				dout.flush();
+			} 
+			
+			//LCD.drawString("moving forw", 0, 3);
+			MovementInterface.move(1, inMsg, 26, RMotor, LMotor);
+			
+			if(Button.getButtons() == Button.ID_ESCAPE){
+				serverSocket.close();
+				break;
+			}
+			
+			//inBuffer.close();
+
+			//clientSocket.close();
+		}
+		
+		//System.out.println("so uscito");
+	}
+}

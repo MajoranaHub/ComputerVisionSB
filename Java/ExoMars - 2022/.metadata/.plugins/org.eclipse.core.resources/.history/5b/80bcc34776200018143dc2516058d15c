@@ -1,0 +1,59 @@
+package atom_core;
+
+import lejos.hardware.sensor.EV3ColorSensor;
+import lejos.robotics.SampleProvider;
+
+public class ColorUtils
+  extends Setup 
+{
+	static boolean black(float[] color)
+	{
+	  for(int i = 0; i < 3; i++)
+	  {
+		  if(color[i] > 0.08) return false;
+	  }
+	  
+	  return true;
+	}
+	
+	static boolean green(float[] color)
+	{
+		if(color[1] / color[0] > 1.5 && color[1] / color[2] > 1.5)
+		{
+			return true;
+		}
+		
+		return false;
+	}
+	
+	static boolean white(float[] color)
+	{
+		if(!green(color) && !black(color)) return true;
+		return false;
+	}
+	
+	static boolean colorEquals(double[] color1, double[] color2, double tolerance)
+	{
+		double[] differences;
+		differences = new double[3];
+		
+		differences[0] = Math.abs(color1[0] - color2[0]);
+		differences[1] = Math.abs(color1[1] - color2[1]);
+		differences[2] = Math.abs(color1[2] - color2[2]);
+		for(int i = 0; i < differences.length; i++)
+		{
+			if(differences[i] > tolerance) return false;
+		}
+		
+		return true;
+	}
+	
+	  public static float[] getValues(EV3ColorSensor sensor)
+	  {
+	    SampleProvider reading = sensor.getRGBMode();
+	    float[] rawValues = new float[reading.sampleSize()];
+	    reading.fetchSample(rawValues, 0);
+	    
+	    return rawValues;
+	  }
+}

@@ -1,0 +1,198 @@
+package atom_core;
+
+import lejos.hardware.Button;
+import lejos.hardware.Sound;
+import lejos.hardware.lcd.LCD;
+
+class Core
+  extends Setup
+{ 
+  public static void play()
+  {
+
+	 Sound.playTone(550, 500);
+	 LCD.drawString("---Running---", 0, 3);
+	 
+	 float[] colorInputR;
+	 float[] colorInputL;
+	 float ultrasonicInput;
+	 
+	 //f-r-l forward, right, left
+	 String lastMove = "";
+	 
+	 //Instruction loop
+	 while(Button.getButtons() != Button.ID_ESCAPE)
+	 {
+		 colorInputR = ColorUtils.getValues(RColor);
+		 colorInputL = ColorUtils.getValues(LColor);
+		 ultrasonicInput = UltrasonicUtils.getValue(Distance);
+		 
+		 //Obstacle
+		 if(ultrasonicInput < 0.055)
+		 {
+			 Sound.beepSequence();
+			 
+			 LCD.drawString("ostacolo", 0, 5);
+			 
+			 MovementInterface.rotate(75, "cw", RMotor, LMotor);//value changed 105
+			 
+			 MovementInterface.move(90, "forw", RMotor, LMotor);//value changed 170
+			 MovementInterface.rotate(75, "ccw", RMotor, LMotor);
+			 
+			 MovementInterface.move(165, "forw", RMotor, LMotor);//value changed 280
+			 
+			 MovementInterface.rotate(75, "ccw", RMotor, LMotor);
+			 
+			 do {
+				 MovementInterface.move(1, "forw", RMotor, LMotor);
+				 colorInputR = ColorUtils.getValues(RColor);
+			 } while(ColorUtils.white(colorInputR));
+			 
+			 MovementInterface.move(10, "forw", RMotor, LMotor);
+			 
+			 do {
+				 MovementInterface.rotate(1, "cw", RMotor, LMotor);
+				 colorInputL = ColorUtils.getValues(LColor);
+			 } while(ColorUtils.white(colorInputL));
+			 
+			 LCD.clear(5);
+			 
+			 Sound.beepSequenceUp();
+		 }
+		 
+		 //White-White
+		 else if(ColorUtils.white(colorInputR) && ColorUtils.white(colorInputL))
+		 {
+			 LCD.drawString("white-white", 0, 4);
+			 MovementInterface.move(1, "forw", RMotor, LMotor);
+			 lastMove = "f";
+			 LCD.clear();
+		 }
+		 
+		 //White-Black
+		 else if(ColorUtils.white(colorInputR) && ColorUtils.black(colorInputL))
+		 {
+			 LCD.drawString("white-black", 0, 4);
+			 MovementInterface.rotate(1, "ccw", RMotor, LMotor);
+			 lastMove = "l";
+			 LCD.clear();
+		 }
+		 
+		 //Black-White
+		 else if(ColorUtils.black(colorInputR) && ColorUtils.white(colorInputL))
+		 {
+			LCD.drawString("black-white", 0, 4);
+			MovementInterface.rotate(1, "cw", RMotor, LMotor);
+			lastMove = "r";
+		 }
+		 
+		 //Black-Black
+		 else if(ColorUtils.black(colorInputR) && ColorUtils.black(colorInputL))
+		 {
+			 LCD.drawString("black-black", 0, 4);
+			 if(lastMove == "f") MovementInterface.move(40, "forw", RMotor, LMotor);
+			 else if(lastMove == "r")
+			 {
+				 LCD.drawString("Curva a destra", 0, 5);
+				 MovementInterface.move(45, "forw", RMotor, LMotor);
+				 MovementInterface.rotate(24, "ccw", RMotor, LMotor);
+				 
+				 do {
+					 MovementInterface.rotate(2, "cw", RMotor, LMotor);
+					 colorInputR = ColorUtils.getValues(RColor);
+					 colorInputL = ColorUtils.getValues(LColor);
+				 } while(!ColorUtils.black(colorInputR) && !ColorUtils.black(colorInputL));
+				 
+				 MovementInterface.rotate(2, "cw", RMotor, LMotor);
+				 
+				 LCD.clear(5);
+			 }
+			 else if(lastMove == "l")
+			 {
+				 LCD.drawString("Curva a sinistra", 0, 5);
+				 MovementInterface.move(45, "forw", RMotor, LMotor);
+				 MovementInterface.rotate(24, "cw", RMotor, LMotor);
+				 
+				 do {
+					 MovementInterface.rotate(2, "ccw", RMotor, LMotor);
+					 colorInputL = ColorUtils.getValues(LColor);
+					 colorInputR = ColorUtils.getValues(RColor);
+				 } while(!ColorUtils.black(colorInputL) && !ColorUtils.black(colorInputR));
+				 
+				 MovementInterface.rotate(2, "ccw", RMotor, LMotor);
+				 
+				 LCD.clear(5);
+			 }
+			 LCD.clear();
+		 }
+		 
+		 //Green-Green
+		 else if(ColorUtils.green(colorInputL) && ColorUtils.green(colorInputR)){
+			 LCD.drawString("green-green", 0, 4);
+			 MovementInterface.rotate(170, "cw", RMotor, LMotor);
+			 do{
+				 MovementInterface.rotate(10, "cw", RMotor, LMotor);
+			 }while(ColorUtils.black(colorInputR));
+			 LCD.clear();
+		 }
+		 
+		 //Random-Green
+		 else if(ColorUtils.green(colorInputR))
+		 {			 
+			LCD.drawString("random-green", 0, 4);
+			MovementInterface.move(25, "forw", RMotor, LMotor);
+			
+			do {
+				MovementInterface.rotate(2, "cw", RMotor, LMotor);
+				
+				colorInputR = ColorUtils.getValues(RColor);
+			} while(!ColorUtils.black(colorInputR));
+			LCD.clear();
+		 }
+		 
+		 //Green-Random
+		 else if(ColorUtils.green(colorInputL))
+		 {
+			 LCD.drawString("green-random", 0, 4);
+			 MovementInterface.move(25, "forw", RMotor, LMotor);
+			 
+			do {
+				MovementInterface.rotate(2, "ccw", RMotor, LMotor);
+				
+				colorInputL = ColorUtils.getValues(LColor);
+			} while(!ColorUtils.black(colorInputL));
+			LCD.clear();
+		 }
+		 
+		 //silver-silver
+		 else if(ColorUtils.silver(colorInputL) || ColorUtils.silver(colorInputR)){
+			 if(ColorUtils.silver(colorInputL) && ColorUtils.silver(colorInputR))
+			 {
+				 Sound.twoBeeps();
+			 }
+			 else if(ColorUtils.silver(colorInputL)) 
+			 {
+				 Sound.beepSequenceUp();
+				 do {
+					 MovementInterface.rotate(1, "ccw", RMotor, LMotor);
+					 colorInputR = ColorUtils.getValues(RColor);
+				 } while(!ColorUtils.silver(colorInputR));
+			 }
+			 else if(ColorUtils.silver(colorInputR))
+			 {
+				 Sound.beepSequence();
+				 
+				 do {
+					 MovementInterface.rotate(1, "cw", RMotor, LMotor);
+					 colorInputL = ColorUtils.getValues(LColor);
+				 } while(!ColorUtils.silver(colorInputL));
+			 }
+			 
+			 EvacuationZone.play();
+		 }
+	 }//Instruction loop
+	 
+	 LCD.clear();
+	 Sound.playTone(330, 500);
+  }
+}

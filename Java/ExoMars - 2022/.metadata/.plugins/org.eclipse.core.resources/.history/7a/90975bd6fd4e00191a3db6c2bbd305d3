@@ -1,0 +1,133 @@
+package atom_core;
+
+import lejos.hardware.Button;
+import lejos.hardware.lcd.LCD;
+import lejos.hardware.motor.EV3LargeRegulatedMotor;
+import lejos.hardware.motor.EV3MediumRegulatedMotor;
+import lejos.hardware.port.SensorPort;
+import lejos.hardware.port.MotorPort;
+import lejos.hardware.sensor.EV3ColorSensor;
+import lejos.hardware.sensor.EV3UltrasonicSensor;
+import lejos.utility.Delay;
+
+public class Test 
+extends Setup{
+	static float ultrasonicInput;
+	static int GyroscopeInput;
+	public static void play()
+	{
+		Gyroscope.reset();
+		while(Button.getButtons() != Button.ID_RIGHT)
+		 {
+			/*MovementInterface.rotate(70, "ccw", RMotor, LMotor);//70 gradi sono 90 con la pala alzata
+			Delay.msDelay(1000);
+			ShovelMotor.rotateTo(-210);//perfetto per abbassare la pala
+			Delay.msDelay(1000);
+			ShovelMotor.rotateTo(0); //perfetto per alzare la pala
+			Delay.msDelay(1000);
+			MovementInterface.rotate(61, "ccw", RMotor, LMotor);//61 gradi sono 90 con la pala abbassata 
+			Delay.msDelay(5000);
+			
+			DropMotor.rotateTo(120); //perfetto per abbassare il carrello di scarico
+			Button.waitForAnyPress();
+			DropMotor.rotateTo(0); //perfetto per alzare il carrello di scarico
+			Button.waitForAnyPress();
+			for (int i=0; i<=5; i++)
+			{
+				MovementInterface.move((20*i), "forw", RMotor, LMotor);
+				LCD.drawString(Float.toString(20*i), 0 , 3);
+				Button.waitForAnyPress();
+				Delay.msDelay(500);
+				LCD.clear();
+			}
+			LCD.drawString(Float.toString(UltrasonicUtils.getValue(DistanceUP)), 0, 3);
+			Button.waitForAnyPress();
+			LCD.clear();
+			if (Button.getButtons() == Button.ID_LEFT)
+			{
+				Gyroscope.reset();
+			}
+			  LCD.drawString(Float.toString(GyroscopeUtils.getValue(Gyroscope)), 0, 3);
+		      Button.waitForAnyPress();
+		      LCD.clear();
+		      do{
+		    	  MovementInterface.rotate(1, "ccw", 1, RMotor, LMotor); 
+		      }while(GyroscopeUtils.getValue(Gyroscope) < 90);
+			if (Button.getButtons() == Button.ID_LEFT)
+			{
+				Gyroscope.reset();
+			}
+			if (Button.getButtons() == Button.ID_ENTER)
+			{
+				ultrasonicInput = UltrasonicUtils.getValue(DistanceUP);
+				if (ultrasonicInput == isNAN)
+				{
+					LCD.drawString("Infinity", 0 , 3);
+					Button.waitForAnyPress();
+					LCD.clear();
+				}
+				else
+				{
+					LCD.drawString("Infinity", 0 , 3);
+					Button.waitForAnyPress();
+					LCD.clear();
+				}
+			}
+			int distance = 100;
+			do {
+				MovementInterface.move(distance, "back", RMotor, LMotor);
+				if(Button.getButtons() == Button.ID_RIGHT) System.exit(0);
+				LCD.drawString(Float.toString(distance), 0 , 3);
+				Button.waitForAnyPress();
+				LCD.clear();
+				distance += 100;
+			}while(distance < 2000);*/
+			do {
+				MovementInterface.move(10, "back", RMotor, LMotor);
+				ultrasonicInput = UltrasonicUtils.getValue(DistanceUP);
+				if(Button.getButtons() == Button.ID_RIGHT) System.exit(0);
+				LCD.drawString(Float.toString(ultrasonicInput), 0 , 3);
+				Button.waitForAnyPress();
+				LCD.clear();
+				if (ultrasonicInput > 120)
+				{
+					LCD.drawString("If infinity", 0 , 3);
+					Button.waitForAnyPress();
+					MovementInterface.move(300, "back", RMotor, LMotor);
+					LCD.clear();
+					break;
+				}
+			}while(ultrasonicInput < 0.50);
+			Button.waitForAnyPress();
+		 }
+		
+		
+		/*if (whiteCounter > 100)
+		{
+			if (lastMove == l) gapRotation = "ccw";
+			else gapRotation = "cw";
+			do{
+				MovementInterface.rotate(1, "gapRotation", timeConstant, RMotor, LMotor);
+				colorInputR = ColorUtils.getValues(RColor);
+				colorInputL = ColorUtils.getValues(LColor);
+				if (ColorUtils.black(colorInputR) || ColorUtils.black(colorInputL)) break;
+				gyroValue = GyroscopeUtils.getValue(Gyroscope);
+				if (gyroValue < 0) gyroValue *= -1;
+			}while(gyroValue < 35);
+			
+			if (!(ColorUtils.black(colorInputR) || ColorUtils.black(colorInputL))){
+				do {
+					MovementInterface.move(1, "forw", RMotor, LMotor);
+					colorInputR = ColorUtils.getValues(RColor);
+					colorInputL = ColorUtils.getValues(LColor);
+				} while(ColorUtils.white(colorInputR) &&  ColorUtils.white(colorInputL));
+			}
+		}*/
+		//CODICE PER EVITARE CHE ESCA AI GAP
+		
+	}
+}
+
+
+
+

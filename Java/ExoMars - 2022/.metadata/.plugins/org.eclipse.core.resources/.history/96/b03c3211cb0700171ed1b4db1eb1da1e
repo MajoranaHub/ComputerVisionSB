@@ -1,0 +1,396 @@
+package atom_core;
+
+import lejos.hardware.Button;
+import lejos.hardware.Sound;
+import lejos.hardware.lcd.LCD;
+import lejos.hardware.motor.EV3LargeRegulatedMotor;
+import lejos.utility.Delay;
+
+class Core
+  extends Menu
+{
+  static void impostazioni()
+  {
+    mDx.setSpeed(300);
+    mSx.setSpeed(300);
+    mDx.setAcceleration(7000);
+    mSx.setAcceleration(7000);
+  }
+  
+  static boolean isGreen(float[] lettura)
+  {
+    float differenza = lettura[1] - lettura[0];
+    if (lettura[1] >= 0.1D) {
+      return false;
+    }
+    if (differenza > 0.04D) {
+      return true;
+    }
+    return false;
+  }
+  
+  static boolean argento(float[] lettura)
+  {
+    if ((lettura[0] <= 0.1D) && (lettura[1] <= 0.1D) && (lettura[2] <= 0.1D)) {
+      return true;
+    }
+    return false;
+  }
+  
+  static void ruota(EV3LargeRegulatedMotor m1, EV3LargeRegulatedMotor m2, int gradi, int modalita)
+  {
+    int n_volte = gradi;
+    int velocita = 200;
+    
+    int costanteDx = 60;
+    int costanteSx = 60;
+    switch (modalita)
+    {
+    case 1: 
+      m2.setSpeed(velocita - 60);
+      m1.setSpeed(velocita + 60);
+      break;
+    case 2: 
+      m1.setSpeed(velocita + 60);
+      m2.setSpeed(velocita - 60);
+    }
+    for (int volte = 0; volte <= n_volte; volte++)
+    {
+      switch (modalita)
+      {
+      case 1: 
+        m2.forward();
+        m1.backward();
+        break;
+      case 2: 
+        m1.forward();
+        m2.backward();
+      }
+      Delay.msDelay(29L);
+    }
+    m1.flt(true);
+    m2.flt();
+  }
+  
+  static void ruota2(EV3LargeRegulatedMotor m1, EV3LargeRegulatedMotor m2, int rotazione1, int rotazione2, int velocita)
+  {
+    int costanteDx = 60;
+    int costanteSx = 60;
+    if (rotazione1 > rotazione2)
+    {
+      m1.setSpeed(velocita - 60);
+      m2.setSpeed(velocita + 60);
+    }
+    else
+    {
+      m1.setSpeed(velocita + 60);
+      m2.setSpeed(velocita - 60);
+    }
+    m1.rotate(rotazione1, true);
+    m2.rotate(rotazione2);
+  }
+  
+  static void avantidi(int potenza, int modalita, int mm)
+  {
+    mDx.setSpeed(potenza);
+    mSx.setSpeed(potenza);
+    
+    int tempoms = mm * 17;
+    switch (modalita)
+    {
+    case 1: 
+      mDx.forward();
+      mSx.forward();
+      break;
+    case 2: 
+      mDx.backward();
+      mSx.backward();
+    }
+    Delay.msDelay(tempoms);
+    mDx.flt(true);
+    mSx.flt();
+  }
+  
+  static void muovi(EV3LargeRegulatedMotor m1, int potenza, int modalita)
+  {
+    m1.setSpeed(potenza);
+    switch (modalita)
+    {
+    case 1: 
+      m1.forward();
+      break;
+    case 2: 
+      m1.backward();
+      break;
+    case 0: 
+      m1.flt(true);
+    }
+  }
+  
+  static boolean isblack(float[] lettura)
+  {
+    if ((lettura[0] < 0.12D) && (lettura[1] < 0.12D) && (lettura[2] < 0.12D)) {
+      return true;
+    }
+    return false;
+  }
+  
+  static boolean confronto(float[] colore, float[] lettura)
+  {
+    if ((Math.abs(colore[0] - lettura[0]) <= 0.16D) && (Math.abs(colore[1] - lettura[1]) <= 0.16D) && (Math.abs(colore[2] - lettura[2]) <= 0.16D)) {
+      return true;
+    }
+    return false;
+  }
+  
+  static void inserisci() {}
+  
+  static void prendiPalla()
+  {
+    mCarrello.stop();
+    mCancello.rotate(-120);
+    mCarrello.rotate(80);
+    mCancello.rotate(100);
+    mCarrello.rotate(-80);
+  }
+  
+  static String[] mosse = { "", "" };
+  
+  static void inserisci_mossa(String mossa)
+  {
+    mosse[1] = mosse[0];
+    mosse[0] = mossa;
+  }
+  
+  public static void play()
+  {
+    boolean premuto = false;
+    float[] bianco = { 0.2F, 0.2F, 0.2F };
+    float[] argento = { 5.0F, 5.0F, 5.0F };
+    
+    impostazioni();
+    
+    Sound.beepSequenceUp();
+    LCD.drawString("INVIO PER INIZIARE", 0, 4);
+    while (!premuto) {
+      if (Button.getButtons() == 2)
+      {
+        premuto = true;
+        LCD.clear();
+      }
+    }
+    float[] letturaSsx = Calibration.lettura(sensoreSx);
+    float[] letturaSdx = Calibration.lettura(sensoreDx);
+    while ((Button.getButtons() != 32) && (!confronto(letturaSsx, argento)))
+    {
+      letturaSsx = Calibration.lettura(sensoreSx);
+      letturaSdx = Calibration.lettura(sensoreDx);
+      if (isGreen(letturaSsx))
+      {
+        avantidi(200, 1, 65);
+        ruota(mDx, mSx, 30, 2);
+        inserisci_mossa("green_sx");
+        Sound.beepSequenceUp();
+      }
+      else if (isGreen(letturaSdx))
+      {
+        avantidi(200, 1, 65);
+        ruota(mDx, mSx, 30, 1);
+        inserisci_mossa("green_dx");
+        Sound.beepSequenceUp();
+      }
+      
+      else if ((confronto(letturaSdx, bianco)) && (confronto(letturaSsx, bianco)))
+      {
+        avantidi(200, 1, 5);
+        inserisci_mossa("dritto");
+        
+        letturaSsx = Calibration.lettura(sensoreSx);
+        letturaSdx = Calibration.lettura(sensoreDx);
+      }
+      
+      else if ((confronto(letturaSdx, bianco)) && (isblack(letturaSsx)))
+      {
+        inserisci_mossa("sx");
+        while ((confronto(letturaSdx, bianco)) && (isblack(letturaSsx)))
+        {
+          ruota(mDx, mSx, 8, 2);
+          letturaSsx = Calibration.lettura(sensoreSx);
+          letturaSdx = Calibration.lettura(sensoreDx);
+        }
+        if (isGreen(letturaSsx))
+        {
+          avantidi(200, 1, 65);
+          ruota(mDx, mSx, 30, 2);
+          inserisci_mossa("green_sx");
+        }
+        if (isGreen(letturaSdx))
+        {
+          avantidi(200, 1, 65);
+          ruota(mDx, mSx, 30, 1);
+          inserisci_mossa("green_dx");
+        }
+        do
+        {
+          avantidi(200, 1, 5);
+          letturaSsx = Calibration.lettura(sensoreSx);
+          letturaSdx = Calibration.lettura(sensoreDx);
+          if (!confronto(letturaSsx, bianco)) {
+            break;
+          }
+        } while (isblack(letturaSdx));
+        while ((isblack(letturaSdx)) && (isblack(letturaSsx)))
+        {
+          letturaSsx = Calibration.lettura(sensoreSx);
+          letturaSdx = Calibration.lettura(sensoreDx);
+          ruota(mDx, mSx, 5, 2);
+        }
+        if (isGreen(letturaSsx))
+        {
+          avantidi(200, 1, 65);
+          ruota(mDx, mSx, 30, 2);
+          inserisci_mossa("green_sx");
+        }
+        if (isGreen(letturaSdx))
+        {
+          avantidi(200, 1, 65);
+          ruota(mDx, mSx, 30, 1);
+          inserisci_mossa("green_dx");
+        }
+        avantidi(200, 1, 20);
+      }
+      
+      else if ((confronto(letturaSsx, bianco)) && (isblack(letturaSdx)))
+      {
+        inserisci_mossa("dx");
+        while ((confronto(letturaSsx, bianco)) && (isblack(letturaSdx)))
+        {
+          ruota(mDx, mSx, 8, 1);
+          letturaSsx = Calibration.lettura(sensoreSx);
+          letturaSdx = Calibration.lettura(sensoreDx);
+        }
+        if (isGreen(letturaSsx))
+        {
+          avantidi(200, 1, 65);
+          ruota(mDx, mSx, 30, 2);
+          inserisci_mossa("green_sx");
+        }
+        else if (isGreen(letturaSdx))
+        {
+          avantidi(200, 1, 65);
+          ruota(mDx, mSx, 30, 1);
+          inserisci_mossa("green_dx");
+        }
+        do{
+          avantidi(200, 1, 5);
+          letturaSsx = Calibration.lettura(sensoreSx);
+          letturaSdx = Calibration.lettura(sensoreDx);
+          if (!confronto(letturaSdx, bianco)) {
+            break;
+          }
+        } while(isblack(letturaSsx));
+        while ((isblack(letturaSdx)) && (isblack(letturaSsx)))
+        {
+          letturaSsx = Calibration.lettura(sensoreSx);
+          letturaSdx = Calibration.lettura(sensoreDx);
+          ruota(mDx, mSx, 5, 1);
+        }
+        if (isGreen(letturaSsx))
+        {
+          avantidi(200, 1, 65);
+          ruota(mDx, mSx, 30, 2);
+          inserisci_mossa("green_sx");
+        }
+        if (isGreen(letturaSdx))
+        {
+          avantidi(200, 1, 65);
+          ruota(mDx, mSx, 30, 1);
+          inserisci_mossa("green_dx");
+        }
+        avantidi(200, 1, 20);
+      }
+      
+      else if ((isblack(letturaSsx)) && (isblack(letturaSdx))) {
+    	  
+    	  ruota(mDx, mSx, 15, 1);
+    	  
+//        avantidi(200, 1, 20);
+//        ruota(mDx, mSx, 7, 2);
+//        letturaSdx = Calibration.lettura(sensoreDx);
+//        
+//        if(!isblack(letturaSdx)) {
+//        	ruota(mDx, mSx, 7, 2);
+//        }
+//        
+//        while ((isblack(letturaSdx)) && (isblack(letturaSsx)))
+//        {
+//          avantidi(200, 1, 20);
+//          letturaSdx = Calibration.lettura(sensoreDx);
+//          letturaSsx = Calibration.lettura(sensoreSx);
+//        }
+//        
+//        letturaSdx = Calibration.lettura(sensoreDx);
+//        letturaSsx = Calibration.lettura(sensoreSx);
+//        
+//        if ((isblack(letturaSdx)) || (isblack(letturaSsx)))
+//        {
+//          LCD.drawString("Avanti di uno", 0, 4);
+//          Button.waitForAnyPress();
+//          LCD.clear();
+//          
+//          avantidi(200, 1, 10);
+//          inserisci_mossa("avanti");
+//        }
+//        else
+//        {
+//          ruota(mDx, mSx, 7, 1);
+//          if (isblack(letturaSdx))
+//          {
+//            LCD.drawString("incrocio", 0, 4);
+//            Button.waitForAnyPress();
+//            LCD.clear();
+//            
+//            avantidi(200, 1, 20);
+//            inserisci_mossa("avanti");
+//          }
+//          else
+//          {
+//            LCD.drawString("Indietro alla linea", 0, 4);
+//            Button.waitForAnyPress();
+//            LCD.clear();
+//            while ((confronto(letturaSdx, bianco)) && (confronto(letturaSsx, bianco)))
+//            {
+//              avantidi(200, 2, 20);
+//              letturaSdx = Calibration.lettura(sensoreDx);
+//              letturaSsx = Calibration.lettura(sensoreSx);
+//            }
+//            if ((mosse[1] == "dx") || (mosse[0] == "dx"))
+//            {
+//              ruota(mDx, mSx, 15, 1);
+//              inserisci_mossa("dx");
+//              
+//              LCD.drawString("Mosso dx", 0, 4);
+//              Button.waitForAnyPress();
+//              LCD.clear();
+//            }
+//            else if ((mosse[1] == "sx") || (mosse[0] == "sx"))
+//            {
+//              ruota(mDx, mSx, 15, 2);
+//              inserisci_mossa("sx");
+//              
+//              LCD.drawString("Mosso sx", 0, 4);
+//              Button.waitForAnyPress();
+//              LCD.clear();
+//            }
+//            avantidi(200, 1, 20);
+//          }
+//        }
+      }
+      
+      else
+      {
+        Button.waitForAnyPress();
+      }
+    }
+  }
+}

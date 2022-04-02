@@ -1,0 +1,171 @@
+package atom_core;
+
+import lejos.hardware.Button;
+import lejos.hardware.Sound;
+
+public class EvacuationZone
+	extends Setup
+{
+	static final int ninetyDegrees = 123;
+	
+	static void play()
+	{
+		boolean firstWall = true;
+		boolean ballPicked = false;
+		String direction = "";
+		
+		float distance;
+		float[] colorInputL;
+		
+		while(!ballPicked && Button.getButtons() != Button.ID_ESCAPE)
+		{
+			MovementInterface.move(10, "forw", RMotor, LMotor);
+			distance = UltrasonicUtils.getValue(Distance);
+			colorInputL = ColorUtils.getValues(LColor);
+			
+			if ((distance < 0.1f || ColorUtils.evacuationZone()) && firstWall)
+			{
+				MovementInterface.rotate(117, "cw", RMotor, LMotor);
+				distance = UltrasonicUtils.getValue(Distance);
+				
+				if(distance < 0.15) direction = "l";
+				else direction = "r";
+				
+				firstWall = false;
+				MovementInterface.rotate(117, "ccw", RMotor, LMotor);
+			}
+			
+			if ((distance < 0.1f || ColorUtils.evacuationZone()) && direction == "r")
+			{
+				rotateBackwards(direction);
+				direction = "l";
+			}
+			
+			else if ((distance < 0.1f || ColorUtils.evacuationZone()) && direction == "l")
+			{
+				rotateBackwards(direction);
+				direction = "r";
+			}
+			
+			else if (ColorUtils.silver(colorInputL) && direction == "r")
+			{
+				MovementInterface.move(40, "back", RMotor, LMotor);
+				rotateBackwards(direction);
+				direction = "l";
+			}
+			
+			else if (ColorUtils.silver(colorInputL) && direction == "l")
+			{
+				MovementInterface.move(40, "back", RMotor, LMotor);
+				rotateBackwards(direction);
+				direction = "r";
+			}
+			
+			if(ColorUtils.silverBall())
+			{
+				Sound.beep();
+				
+				takeBall();
+				ballPicked = true;
+			}
+		}
+		
+		alignToWall();
+		
+		while(ballPicked && Button.getButtons() != Button.ID_ESCAPE)
+		{
+			MovementInterface.move(10, "forw", RMotor, LMotor);
+			distance = UltrasonicUtils.getValue(Distance);
+			colorInputL = ColorUtils.getValues(LColor);
+			String rotation;
+			
+			if (ColorUtils.evacuationZone())
+			{
+				MovementInterface.move(40, "back", RMotor, LMotor);
+				MovementInterface.rotate(ninetyDegrees, "ccw", RMotor, LMotor);
+				distance = UltrasonicUtils.getValue(Distance);
+				
+				MovementInterface.rotate(ninetyDegrees, "cw", RMotor, LMotor);
+				MovementInterface.move(40, "forw", RMotor, LMotor);
+				
+				if (distance < 0.25) rotation = "cw";
+				else rotation = "ccw";
+				
+				dropBall(rotation);
+				ballPicked = false;
+			}
+			
+			else if (distance < 0.08 || ColorUtils.silver(colorInputL))
+			{
+				if(ColorUtils.silver(colorInputL)) MovementInterface.move(50, "back", RMotor, LMotor);
+				
+				MovementInterface.move(50, "back", RMotor, LMotor);
+				MovementInterface.rotate(ninetyDegrees, "cw", RMotor, LMotor);
+			}
+		}
+	}
+	
+	static void dropBall(String direction)
+	{
+		Sound.beepSequenceUp();
+		
+		MovementInterface.rotate((ninetyDegrees * 2) - (ninetyDegrees / 4), direction, RMotor, LMotor);
+		MovementInterface.move(60, "back", RMotor, LMotor);
+		GrabMotor.rotate(-95);
+		OpenMotor.rotate(-150);
+		
+		OpenMotor.rotate(150);
+		GrabMotor.rotate(95);
+	}
+	
+	static void alignToWall()
+	{
+		float distance;		
+		distance = UltrasonicUtils.getValue(Distance);
+		
+		while(distance > 0.1 && !ColorUtils.evacuationZone())
+		{
+			MovementInterface.move(10, "forw", RMotor, LMotor);
+			distance = UltrasonicUtils.getValue(Distance);
+		}
+		
+		if(!ColorUtils.evacuationZone()) MovementInterface.rotate(ninetyDegrees, "cw", RMotor, LMotor);
+	}
+	
+	static void rotateBackwards(String direction)
+	{
+		if(direction == "r")
+		{
+			MovementInterface.move(40, "back", RMotor, LMotor);
+			
+			MovementInterface.rotate(ninetyDegrees, "cw", RMotor, LMotor);
+			MovementInterface.move(100, "forw", RMotor, LMotor);
+			
+			MovementInterface.rotate(ninetyDegrees, "cw", RMotor, LMotor);
+		}
+		else
+		{
+			MovementInterface.move(40, "back", RMotor, LMotor);
+			
+			MovementInterface.rotate(ninetyDegrees, "ccw", RMotor, LMotor);
+			MovementInterface.move(100, "forw", RMotor, LMotor);
+			
+			MovementInterface.rotate(ninetyDegrees, "ccw", RMotor, LMotor);
+		}
+	}
+	
+	static void takeBall()
+	{
+		MovementInterface.move(100, "back", RMotor, LMotor);
+		MovementInterface.rotate(235, "cw", RMotor, LMotor);
+		
+		GrabMotor.rotate(-95);
+		OpenMotor.rotate(-150);
+		
+		MovementInterface.move(100, "back", RMotor, LMotor);
+		OpenMotor.rotate(150);
+		GrabMotor.rotate(95);
+		
+		MovementInterface.rotate(235, "ccw", RMotor, LMotor);
+	}
+}

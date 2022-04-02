@@ -1,0 +1,18 @@
+package atom_core;
+
+import lejos.hardware.Button;
+import lejos.hardware.lcd.LCD;
+import lejos.hardware.motor.EV3LargeRegulatedMotor;
+import lejos.hardware.motor.EV3MediumRegulatedMotor;
+import lejos.hardware.port.SensorPort;
+import lejos.hardware.port.MotorPort;
+import lejos.hardware.sensor.EV3ColorSensor;
+import lejos.hardware.sensor.EV3UltrasonicSensor;
+
+public class Test 
+extends Setup{
+	public static void play()
+	{
+		
+	}
+}

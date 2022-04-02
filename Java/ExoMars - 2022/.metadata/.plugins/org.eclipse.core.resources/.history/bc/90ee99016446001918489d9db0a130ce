@@ -1,0 +1,22 @@
+package atom_core;
+
+import lejos.hardware.sensor.EV3GyroSensor;
+import lejos.robotics.SampleProvider;
+
+public class GyroscopeUtils
+extends Setup
+{
+	
+	//Lettura della distanza del sensore ultrasuoni
+	public static float getValue(EV3GyroSensor sensor)
+	{
+	  SampleProvider reading = sensor.getAngleMode();
+	  float[] rawValues = new float[reading.sampleSize()];
+	  
+	  /*I valori sotto forma di SampleProvider sono convertiti in un arrray di float con un numero di elementi pari alla
+	   *quantità di valori rilevati con una lettura*/
+	  reading.fetchSample(rawValues, 0);
+	    
+	  return rawValues[0];
+	}
+}

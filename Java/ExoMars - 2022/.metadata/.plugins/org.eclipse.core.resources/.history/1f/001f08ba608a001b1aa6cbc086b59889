@@ -1,0 +1,7 @@
+package atom_core;
+
+public class NewEvacuation
+extends Setup
+{
+
+}

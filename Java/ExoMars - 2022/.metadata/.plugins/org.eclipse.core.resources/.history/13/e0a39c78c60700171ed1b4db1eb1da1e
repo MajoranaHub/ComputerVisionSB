@@ -1,0 +1,42 @@
+package atom_core;
+import lejos.hardware.Button;
+import lejos.hardware.lcd.LCD;
+import lejos.hardware.motor.EV3LargeRegulatedMotor;
+import lejos.hardware.port.MotorPort;
+import lejos.hardware.port.SensorPort;
+import lejos.hardware.sensor.EV3ColorSensor;
+import lejos.hardware.sensor.EV3UltrasonicSensor;
+
+public class Menu {
+	static EV3LargeRegulatedMotor mDx = new EV3LargeRegulatedMotor(MotorPort.A);
+	static EV3LargeRegulatedMotor mSx = new EV3LargeRegulatedMotor(MotorPort.D);
+	static EV3ColorSensor sensoreDx = new EV3ColorSensor(SensorPort.S1);
+	static EV3ColorSensor sensoreSx = new EV3ColorSensor(SensorPort.S4);
+	//static EV3UltrasonicSensor sensoreDist = new EV3UltrasonicSensor(SensorPort.S2);
+	
+	public static void main(String[] args) {		
+		String[] opzioni;
+		opzioni = new String[] {"Inizia", "Calibra", "Muovi"};
+		int scelta = 0;
+		
+		while(true) {																//sistema di menu basilare
+			LCD.clear();
+			LCD.drawString(opzioni[scelta], 0, 4);
+			
+			Button.waitForAnyPress();
+			if(Button.getButtons() == Button.ID_DOWN) scelta++;
+			else if(Button.getButtons() == Button.ID_UP) scelta--;
+			
+			if(scelta == 3) scelta = 0;
+			if(scelta == -1) scelta = 2;
+			
+			if(Button.getButtons() == Button.ID_ENTER) {
+				LCD.clear();
+				if(scelta == 0) {Core.play();}
+				else if(scelta == 1) {Calibration.play();}
+				else {Move.play();}
+			}
+			else if(Button.getButtons() == Button.ID_ESCAPE) {System.exit(0);}
+		}
+	}
+}

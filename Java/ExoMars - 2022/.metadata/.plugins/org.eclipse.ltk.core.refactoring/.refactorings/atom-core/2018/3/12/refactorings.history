@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Copy package &apos;atom_core&apos; to &apos;Test/src&apos;&#x0D;&#x0A;- Original project: &apos;atom-core&apos;&#x0D;&#x0A;- Destination element: &apos;Test/src&apos;&#x0D;&#x0A;- Original element: &apos;atom-core/src/atom_core&apos;" description="Copy package" destination="=Test/src" element1="/src&lt;atom_core" flags="589830" fragments="1" id="org.eclipse.jdt.ui.copy" policy="org.eclipse.jdt.ui.copyPackages" stamp="1521886761576" version="1.0"/>
+</session>

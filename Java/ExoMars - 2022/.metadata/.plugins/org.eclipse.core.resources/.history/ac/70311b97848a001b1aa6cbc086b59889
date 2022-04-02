@@ -1,0 +1,18 @@
+package atom_core;
+
+import lejos.hardware.Button;
+
+public class NewEvacuation
+extends Setup
+{
+	static int timeConstant = 15;
+	static int timeConstantMove = 26;
+	static float[] colorR;
+	static float[] colorL;
+	
+	public static void play() {
+		while(Button.getButtons() != Button.ID_ESCAPE) {
+			
+		}
+	}
+}

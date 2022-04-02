@@ -1,0 +1,60 @@
+package atom_core;
+
+import lejos.hardware.Button;
+import lejos.hardware.lcd.LCD;
+import lejos.hardware.motor.EV3LargeRegulatedMotor;
+import lejos.hardware.motor.EV3MediumRegulatedMotor;
+import lejos.hardware.port.SensorPort;
+import lejos.hardware.port.MotorPort;
+import lejos.hardware.sensor.EV3ColorSensor;
+import lejos.hardware.sensor.EV3UltrasonicSensor;
+import lejos.utility.Delay;
+
+public class Test 
+extends Setup{
+	static int GyroscopeInput;
+	public static void play()
+	{
+		Gyroscope.reset();
+		while(Button.getButtons() != Button.ID_RIGHT)
+		 {
+			/*MovementInterface.rotate(70, "ccw", RMotor, LMotor);//70 gradi sono 90 con la pala alzata
+			Delay.msDelay(1000);
+			ShovelMotor.rotateTo(-210);//perfetto per abbassare la pala
+			Delay.msDelay(1000);
+			ShovelMotor.rotateTo(0); //perfetto per alzare la pala
+			Delay.msDelay(1000);
+			MovementInterface.rotate(61, "ccw", RMotor, LMotor);//61 gradi sono 90 con la pala abbassata 
+			Delay.msDelay(5000);
+			
+			DropMotor.rotateTo(120); //perfetto per abbassare il carrello di scarico
+			Button.waitForAnyPress();
+			DropMotor.rotateTo(0); //perfetto per alzare il carrello di scarico
+			Button.waitForAnyPress();
+			for (int i=0; i<=5; i++)
+			{
+				MovementInterface.move((20*i), "forw", RMotor, LMotor);
+				LCD.drawString(Float.toString(20*i), 0 , 3);
+				Button.waitForAnyPress();
+				Delay.msDelay(500);
+				LCD.clear();
+			}
+			LCD.drawString(Float.toString(UltrasonicUtils.getValue(DistanceUP)), 0, 3);
+			Button.waitForAnyPress();
+			LCD.clear();
+			if (Button.getButtons() == Button.ID_LEFT)
+			{
+				Gyroscope.reset();
+			}*/
+			  LCD.drawString(Float.toString(GyroscopeUtils.getValue(Gyroscope)), 0, 3);
+		      Button.waitForAnyPress();
+		      LCD.clear();
+		      MovementInterface.rotate(1, "cw", RMotor, LMotor);
+			if (Button.getButtons() == Button.ID_LEFT)
+			{
+				Gyroscope.reset();
+			}
+			
+		 }
+	}
+}

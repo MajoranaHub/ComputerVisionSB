@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<qualifiedTypeNameHistroy>
+    <fullyQualifiedTypeName name="lejos.robotics.RegulatedMotor"/>
+    <fullyQualifiedTypeName name="lejos.hardware.motor.BaseRegulatedMotor"/>
+    <fullyQualifiedTypeName name="lejos.hardware.port.AnalogPort"/>
+    <fullyQualifiedTypeName name="lejos.hardware.port.SensorPort"/>
+    <fullyQualifiedTypeName name="atom_core.EvacuationZone"/>
+    <fullyQualifiedTypeName name="lejos.hardware.Sound"/>
+    <fullyQualifiedTypeName name="javax.sound.midi.Soundbank"/>
+    <fullyQualifiedTypeName name="java.awt.Button"/>
+    <fullyQualifiedTypeName name="java.util.concurrent.Delayed"/>
+    <fullyQualifiedTypeName name="java.lang.String"/>
+    <fullyQualifiedTypeName name="atom_core.UltrasonicUtils"/>
+    <fullyQualifiedTypeName name="atom_core.NewEvacuation"/>
+    <fullyQualifiedTypeName name="atom_core.MovementInterface"/>
+    <fullyQualifiedTypeName name="atom_core.GyroscopeUtils"/>
+    <fullyQualifiedTypeName name="atom_core.ColorUtils"/>
+    <fullyQualifiedTypeName name="lejos.utility.Delay"/>
+    <fullyQualifiedTypeName name="lejos.hardware.lcd.LCD"/>
+    <fullyQualifiedTypeName name="lejos.hardware.Button"/>
+    <fullyQualifiedTypeName name="java.io.OutputStream"/>
+</qualifiedTypeNameHistroy>

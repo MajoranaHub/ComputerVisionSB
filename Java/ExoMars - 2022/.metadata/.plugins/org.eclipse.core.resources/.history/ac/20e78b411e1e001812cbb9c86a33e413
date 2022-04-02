@@ -1,0 +1,134 @@
+package atom_core;
+
+import lejos.hardware.Button;
+import lejos.hardware.Sound;
+import lejos.hardware.lcd.LCD;
+
+class Core
+  extends Setup
+{  	 
+  public static void play()
+  {
+	 Sound.playTone(550, 500);
+	 LCD.drawString("---Running---", 0, 3);
+	 
+	 float[] colorInputR;
+	 float[] colorInputL;
+	 float ultrasonicInput;
+	 
+	 //f-r-l forward, right, left
+	 String lastMove = "";
+	 
+	 //Instruction loop
+	 while(Button.getButtons() != Button.ID_ESCAPE)
+	 {
+		 colorInputR = ColorUtils.getValues(RColor);
+		 colorInputL = ColorUtils.getValues(LColor);
+		 ultrasonicInput = UltrasonicUtils.getValue(Distance);
+		 
+		 //Obstacle
+		 if(ultrasonicInput < 0.2)
+		 {
+			 MovementInterface.rotate(90, "cw", RMotor, LMotor);
+			 
+			 MovementInterface.move(50, "forw", RMotor, LMotor);
+			 MovementInterface.rotate(90, "ccw", RMotor, LMotor);
+			 
+			 MovementInterface.move(80, "forw", RMotor, LMotor);
+			 
+			 MovementInterface.rotate(90, "ccw", RMotor, LMotor);
+			 MovementInterface.move(50, "forw", RMotor, LMotor);
+			 MovementInterface.rotate(90, "cw", RMotor, LMotor);
+		 }
+		 
+		 //White-White
+		 else if(ColorUtils.white(colorInputR) && ColorUtils.white(colorInputL))
+		 {
+			 MovementInterface.move(1, "forw", RMotor, LMotor);
+			 lastMove = "f";
+		 }
+		 
+		 //White-Black
+		 else if(ColorUtils.white(colorInputR) && ColorUtils.black(colorInputL))
+		 {
+			 MovementInterface.rotate(2, "ccw", RMotor, LMotor);
+			 lastMove = "l";
+		 }
+		 
+		 //Black-White
+		 else if(ColorUtils.black(colorInputR) && ColorUtils.white(colorInputL))
+		 {
+			MovementInterface.rotate(2, "cw", RMotor, LMotor);
+			lastMove = "r";
+		 }
+		 
+		 //Black-Black
+		 else if(ColorUtils.black(colorInputR) && ColorUtils.black(colorInputL))
+		 {
+			 if(lastMove == "f") MovementInterface.move(40, "forw", RMotor, LMotor);
+			 else if(lastMove == "r")
+			 {
+				 LCD.drawString("Curva a destra", 0, 5);
+				 MovementInterface.move(40, "forw", RMotor, LMotor);
+				 
+				 do {
+					 MovementInterface.rotate(2, "cw", RMotor, LMotor);
+					 colorInputR = ColorUtils.getValues(RColor);
+					 colorInputL = ColorUtils.getValues(LColor);
+				 } while(!ColorUtils.black(colorInputR) && !ColorUtils.black(colorInputL));
+				 
+				 MovementInterface.rotate(2, "cw", RMotor, LMotor);
+				 
+				 LCD.clear(5);
+			 }
+			 else if(lastMove == "l")
+			 {
+				 LCD.drawString("Curva a sinistra", 0, 5);
+				 MovementInterface.move(40, "forw", RMotor, LMotor);
+				 
+				 do {
+					 MovementInterface.rotate(2, "ccw", RMotor, LMotor);
+					 colorInputL = ColorUtils.getValues(LColor);
+					 colorInputR = ColorUtils.getValues(RColor);
+				 } while(!ColorUtils.black(colorInputL) && !ColorUtils.black(colorInputR));
+				 
+				 MovementInterface.rotate(2, "ccw", RMotor, LMotor);
+				 
+				 LCD.clear(5);
+			 }
+		 }
+		 
+		 //Random-Green
+		 else if(ColorUtils.green(colorInputR))
+		 {
+			MovementInterface.move(40, "forw", RMotor, LMotor);
+			
+			do {
+				MovementInterface.rotate(2, "cw", RMotor, LMotor);
+				
+				colorInputR = ColorUtils.getValues(RColor);
+			} while(!ColorUtils.black(colorInputR));
+		 }
+		 
+		 //Green-Random
+		 else if(ColorUtils.green(colorInputL))
+		 {
+			 MovementInterface.move(40, "forw", RMotor, LMotor);
+			 
+			do {
+				MovementInterface.rotate(2, "ccw", RMotor, LMotor);
+				
+				colorInputL = ColorUtils.getValues(LColor);
+			} while(!ColorUtils.black(colorInputL));
+		 }
+		 
+		 else
+		 {
+			Sound.buzz();
+		 }
+	 }//Instruction loop
+	 
+	 LCD.clear();
+	 Sound.playTone(330, 500);
+  }
+}
