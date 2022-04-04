@@ -1,7 +1,4 @@
-# python ball_tracking.py --video ball_tracking_example.mp4
-# python ball_tracking.py
-
-# import the necessary packages
+# importa le librerie
 from collections import deque
 from PIL import Image
 import argparse
@@ -9,80 +6,41 @@ import imutils
 import cv2
 import numpy as np
 
-
+#controlla il colore di un pixel specifico
+#(si usa per controllare il colore del cerchio trovato)
 def checkcolour(x,y,frame):
     color_coverted = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     pil_image=Image.fromarray(color_coverted)
     r, g, b = pil_image.getpixel((x, y))
     return(b,g,r)
-    
+                                 
+#prende video dalla webcam
+camera = cv2.VideoCapture(0)
 
-ap = argparse.ArgumentParser()
-ap.add_argument("-v", "--video",
-    help="path to the (optional) video file")
-ap.add_argument("-b", "--buffer", type=int, default=64,
-    help="max buffer size")
-args = vars(ap.parse_args())
-
-
-
-# define the lower and upper boundaries of the "green"
-# ball in the HSV color space, then initialize the
-# list of tracked points
-#greenLower = (29, 86, 6)
-#greenUpper = (64, 255, 255)
-greenLower = (12, 0, 0)
-greenUpper = (119, 85, 255)
-pts = deque(maxlen=args["buffer"])
-
-# if a video path was not supplied, grab the reference
-# to the webcam
-if not args.get("video", False):
-    camera = cv2.VideoCapture(0)
-
-# otherwise, grab a reference to the video file
-else:
-    camera = cv2.VideoCapture(args["video"])
-
-# keep looping
+# loop principale
 while True:
-    # grab the current frame
+    # prendi il frame corrente
     (grabbed, frame) = camera.read()
 
-    # if we are viewing a video and we did not grab a frame,
-    # then we have reached the end of the video
-    if args.get("video") and not grabbed:
-        break
-
-    # resize the frame, blur it, and convert it to the HSV
-    # color space
+    #ritaglia il frame, copialo, convertilo in hsv e trasformal o in canny
     frame = imutils.resize(frame, width=600)
     copyframe = frame.copy()
-    # blurred = cv2.GaussianBlur(frame, (11, 11), 0)
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-    
-    edges = cv2.Canny(frame,70,110)
+    edges = cv2.Canny(frame,120,60)
 
-    # construct a mask for the color "green", then perform
-    # a series of dilations and erosions to remove any small
-    # blobs left in the mask
-    #mask = cv2.inRange(hsv, greenLower, greenUpper)
-    #mask = cv2.erode(mask, None, iterations=2)
+    #toglie blob dall immagine in canny
     mask = cv2.dilate(edges, None, iterations=1)
 
-    # find contours in the mask and initialize the current
-    # (x, y) center of the ball
+    # trova i contorni della palla e ne trova il centro
     cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL,
         cv2.CHAIN_APPROX_SIMPLE)[-2]
     center = None
 
-    # only proceed if at least one contour was found
+    # procedi solo se vedi piu di 0 contorni
     if len(cnts) > 0:
         
             
-        # find the largest contour in the mask, then use
-        # it to compute the minimum enclosing circle and
-        # centroid
+       #trova il contorno piu ghrande e il minimo cerchio e centro
         c = max(cnts, key=cv2.contourArea)
         ((x, y), radius) = cv2.minEnclosingCircle(c)
         
@@ -93,28 +51,22 @@ while True:
         M = cv2.moments(c)
         center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
 
-        # only proceed if the radius meets a minimum size
+        # procedi solo seil raggio e piu grande di
         if radius > 10:
-            # draw the circle and centroid on the frame,
-            # then update the list of tracked points
-            #cv2.circle(frame, (int(x), int(y)), int(radius),
-                #(0, 255, 255), 2)
+            # disegna il cerchioe il centro
+            # aggiorna la list dei punti trackati
             cv2.circle(frame, center, 5, (0, 0, 255), -1)
             cv2.putText(frame,str(int(x))+" "+str(int(y)),center,cv2.FONT_HERSHEY_SIMPLEX,1,color,2,cv2.LINE_AA)
 
-
-    # update the points queue
-    #pts.appendleft(center)
-
-    # show the frame to our screen
+    # mostra il frame 
     cv2.imshow("Frame", frame)
     cv2.imshow("edges",edges)
     key = cv2.waitKey(1) & 0xFF
 
-    # if the 'q' key is pressed, stop the loop
+    # se si preme il tasto q il loop si ferma
     if key == ord("q"):
         break
 
-# cleanup the camera and close any open windows
+# pulisci la camera e chiudi le finestre
 camera.release() 
 cv2.destroyAllWindows()
