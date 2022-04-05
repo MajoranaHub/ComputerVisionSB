@@ -11,8 +11,6 @@ spessore
 Il prgramma in python comunica con l'ev3 attraverso socket di rete, visto
 che il collegamento usb stabilisce una connessione di rete tra i 2
 dispositivi
-[![Stability: Experimental]
-(https://masterminds.github.io/stability/experimental.svg)]
-(https://masterminds.github.io/stability/experimental.html)
+[![Stability: Experimental](https://masterminds.github.io/stability/experimental.svg)](https://masterminds.github.io/stability/experimental.html)
 
 
