@@ -1,9 +1,10 @@
 #RoboCup 2022
 ##### Scuola: IIS ETTORE MAJORANA AVEZZANO
 Oggetto: Sistemi di riconoscimento e movimento robot lego + raspberry
-pi 4
+pi 4 <br>
 Utilizzando OpenCV utilizziamo un programma in python per trovare le
-sfere argentate e nere
+sfere argentate e nere.
+<br>
 Abbiamo preso una webcam e l'abbiamo modificata per ridurre lo
 spessore
 <img src="https://github.com/RoBoCuPmAjOrAnA/Robocup/blob/main/Photos/6AE20BD1-6800-4041-9276-8124A2815BF1.jpeg" width="300" height="400">
