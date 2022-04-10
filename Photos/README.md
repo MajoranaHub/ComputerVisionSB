@@ -1,0 +1,1 @@
+directory per foto
