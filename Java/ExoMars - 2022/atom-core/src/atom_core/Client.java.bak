@@ -12,7 +12,7 @@ import java.io.*;
 
 public class Client extends Setup{
 	public static void grab() {
-		Button.waitForAnyPress();
+		
 	}
 	public static void drop() {
 		
