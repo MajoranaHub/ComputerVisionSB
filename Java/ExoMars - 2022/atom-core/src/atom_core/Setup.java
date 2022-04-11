@@ -106,7 +106,10 @@ public class Setup
 						// TODO Auto-generated catch block
 						LCD.clear();
 						LCD.drawString(e.toString(), 0, 3);
-					}
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} 
 	    			break;
     		} 
     		

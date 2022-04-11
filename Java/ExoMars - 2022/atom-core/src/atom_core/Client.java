@@ -5,6 +5,8 @@ import java.util.*;
 
 import lejos.hardware.Button;
 import lejos.hardware.lcd.LCD;
+import lejos.utility.Delay;
+
 import java.util.concurrent.TimeUnit;
 import java.nio.charset.StandardCharsets;
 import java.io.*;
@@ -22,20 +24,27 @@ public class Client extends Setup{
 	}
 	
 	public static void start() throws IOException, InterruptedException{
-		Socket serverSocket = new Socket("10.0.1.2", 1500);
+		Socket serverSocket = new Socket("10.0.1.4", 1500);
 		//System.out.println("Connesso a " + serverSocket);
-		String lastMove = "ccw";
+		String lastMove = "forw";
 		String inMsg;
 		while(true) {
-			TimeUnit.MILLISECONDS.sleep(30);
+			//TimeUnit.MILLISECONDS.sleep(30);
+			//Delay.msDelay(10);
 			LCD.clear();
 			
-			if(lastMove.equals("forw"))
-				System.out.println(lastMove);
-				MovementInterface.move(1, lastMove, 26, RMotor, LMotor);
-			else if(lastMove.equals("cw") || lastMove.equals("ccw"))
-				System.out.println(lastMove);
-				MovementInterface.rotate(1, lastMove, 26, RMotor, LMotor);
+			if(lastMove.equals("forw")) {
+				//System.out.println(lastMove);
+				LCD.drawString(lastMove, 0, 3);
+				MovementInterface.move(1, lastMove, 13, RMotor, LMotor);
+			}
+			else if(lastMove.equals("cw") || lastMove.equals("ccw")) {
+				//System.out.println(lastMove);
+				LCD.drawString(lastMove, 0, 3);
+				MovementInterface.rotate(1, lastMove, 13, RMotor, LMotor);
+			}
+			
+			//lastMove = "ccw";
 			
 			OutputStream outputStream = serverSocket.getOutputStream();
 			DataOutputStream dout = new DataOutputStream(outputStream);
@@ -47,28 +56,22 @@ public class Client extends Setup{
 			
 			if (inBuffer.ready()) {
 				inMsg = inBuffer.readLine();
-				//System.out.println("read");
 				LCD.clear();
-				LCD.drawString(inMsg, 0, 3);
-				//Button.waitForAnyPress();
+				//LCD.drawString(inMsg, 0, 3);
 				if (inMsg.equals("grab")) grab();
 				else if (inMsg.equals("drop")) drop();
 				else if (inMsg.equals("exit")) exit();
 				lastMove = inMsg.toString();
 			}
 			
-			//LCD.drawString("moving forw", 0, 3);
 			
 			if(Button.getButtons() == Button.ID_ESCAPE){
 				serverSocket.close();
 				break;
 			}
 			
-			//inBuffer.close();
 
-			//clientSocket.close();
 		}
 		
-		//System.out.println("so uscito");
 	}
 }

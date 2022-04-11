@@ -1,0 +1,72 @@
+package atom_core;
+
+import java.net.*;
+import java.util.*;
+
+import lejos.hardware.Button;
+import lejos.hardware.lcd.LCD;
+import java.util.concurrent.TimeUnit;
+import java.nio.charset.StandardCharsets;
+import java.io.*;
+
+
+public class Client extends Setup{
+	public static void grab() {
+		Button.waitForAnyPress();
+	}
+	public static void drop() {
+		
+	}
+	public static void exit() {
+		
+	}
+	
+	public static void start() throws IOException, InterruptedException{
+		Socket serverSocket = new Socket("localhost", 1500);
+		//System.out.println("Connesso a " + serverSocket);
+		String lastMove = "ccw";
+		String inMsg;
+		while(true) {
+			TimeUnit.MILLISECONDS.sleep(30);
+			LCD.clear();
+			
+			if(lastMove.equals("forw")) {
+				System.out.println(lastMove);
+				MovementInterface.move(1, lastMove, 26, RMotor, LMotor);
+			}
+			else if(lastMove.equals("cw") || lastMove.equals("ccw")) {
+				System.out.println(lastMove);
+				MovementInterface.rotate(1, lastMove, 26, RMotor, LMotor);
+			}
+			
+			//lastMove = "ccw";
+			
+			OutputStream outputStream = serverSocket.getOutputStream();
+			DataOutputStream dout = new DataOutputStream(outputStream);
+			
+			dout.writeUTF("ok");
+			dout.flush();
+			
+			BufferedReader inBuffer = new BufferedReader(new InputStreamReader(serverSocket.getInputStream(), StandardCharsets.UTF_8));
+			
+			if (inBuffer.ready()) {
+				inMsg = inBuffer.readLine();
+				LCD.clear();
+				LCD.drawString(inMsg, 0, 3);
+				if (inMsg.equals("grab")) grab();
+				else if (inMsg.equals("drop")) drop();
+				else if (inMsg.equals("exit")) exit();
+				lastMove = inMsg.toString();
+			}
+			
+			
+			if(Button.getButtons() == Button.ID_ESCAPE){
+				serverSocket.close();
+				break;
+			}
+			
+
+		}
+		
+	}
+}
