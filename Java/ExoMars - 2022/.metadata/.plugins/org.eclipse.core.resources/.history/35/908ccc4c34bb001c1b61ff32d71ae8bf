@@ -53,7 +53,8 @@ public class Setup
     LMotor.setSpeed(250);
     //DropMotor.setSpeed(50); // --> motore gara classica
     colorSensorRotator.setSpeed(50); // --> motore per gara del 2021
-    ShovelMotor.setSpeed(180);
+    ShovelMotor.setSpeed(120);
+    ShovelMotor.
     String[] pippo = {"1"};
     
     //Ciclo del menu principale

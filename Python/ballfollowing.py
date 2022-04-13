@@ -10,7 +10,7 @@ ballCounter = 0
 evaquationCompleted = False
 
 s = socket.socket()
-s.bind(('localhost', 1500))
+s.bind(('10.0.1.4', 1500))
 
 def checkcolour(x,y,frame):
     color_coverted = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -22,7 +22,7 @@ def trackobject(oggetto):
     (grabbed, frame) = camera.read()
     x = -1
     y = -1
-    frame = imutils.resize(frame, width=600)
+    frame = imutils.resize(frame, width=640)
     copyframe = frame.copy()
     # blurred = cv2.GaussianBlur(frame, (11, 11), 0)
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
@@ -56,32 +56,42 @@ def trackobject(oggetto):
     cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL,
         cv2.CHAIN_APPROX_SIMPLE)[-2]
     center = None
-
+    
     # only proceed if at least one contour was found
     if len(cnts) > 0:
         # find the largest contour in the mask, then use
         # it to compute the minimum enclosing circle and
         # centroid
-        c = max(cnts, key=cv2.contourArea)
-        ((x, y), radius) = cv2.minEnclosingCircle(c)
 
-        M = cv2.moments(c)
-        center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
+        contour_list = []
 
-        color=checkcolour(int(x),int(y),copyframe)
+        for contour in cnts:
+            approx = cv2.approxPolyDP(contour,0.01*cv2.arcLength(contour,True),True)
+            area = cv2.contourArea(contour)
+            if ((len(approx) > 8) & (len(approx) < 23) & (area > 30) ):
+                contour_list.append(contour)
+        
+        if len(contour_list) > 0:
+            c = max(contour_list, key=cv2.contourArea)
+            ((x, y), radius) = cv2.minEnclosingCircle(c)
+            color = checkcolour(int(x),int(y),copyframe)
+            M = cv2.moments(c)
+            center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
+
+        
 
         # only proceed if the radius meets a minimum size
-        if radius > 10:
+        #if radius > 10:
             # draw the circle and centroid on the frame,
             # then update the list of tracked points
             #cv2.circle(frame, (int(x), int(y)), int(radius),
                 #(0, 255, 255), 2)
-            cv2.circle(frame, center, 5, (0, 0, 255), -1)
-            cv2.putText(frame,str(int(x))+" "+str(int(y)),center,cv2.FONT_HERSHEY_SIMPLEX,1,color,2,cv2.LINE_AA)
+            #cv2.circle(frame, center, 5, (0, 0, 255), -1)
+            #cv2.putText(frame,str(int(x))+" "+str(int(y)),center,cv2.FONT_HERSHEY_SIMPLEX,1,color,2,cv2.LINE_AA)
 
-    cv2.imshow("frame", frame)
-    cv2.imshow("edges", edges)
-    key = cv2.waitKey(2) & 0xFF
+    #cv2.imshow("frame", frame)
+    #cv2.imshow("edges", edges)
+    #key = cv2.waitKey(2) & 0xFF
     
     return x, y
 
@@ -98,16 +108,16 @@ while True:
         ack = clientsocket.recv(2)
         print(ack)
         if ack == b'ok' :
-
+            
             if ballCounter < 4:
                 x, y = trackobject('ball')
-                
+                print(f"x:{x}, y:{y}")
                 print('going to ball')
                 if x > -1 and y > -1:
-                    if x < 250:
+                    if x < 220:
                         msg = 'ccw\n'
                         clientsocket.send(msg.encode('utf-8'))
-                    elif x > 350:
+                    elif x > 420:
                         msg = 'cw\n'
                         clientsocket.send(msg.encode('utf-8'))
                     elif y < 300:
@@ -117,7 +127,8 @@ while True:
                         msg = 'grab\n'
                         clientsocket.send(msg.encode('utf-8'))
                         #ballCounter += 1
-                else: clientsocket.send(b'noxy')
+                else: print('noxy')
+			
                 
             elif not(evaquationCompleted):
                 #cerca zona di evaquazione

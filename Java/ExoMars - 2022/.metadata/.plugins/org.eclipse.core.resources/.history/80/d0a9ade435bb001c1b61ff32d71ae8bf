@@ -20,8 +20,8 @@ public class Client extends Setup{
 		Sound.beepSequenceUp();
 		//MovementInterface.move(10, "back", 26, RMotor, LMotor);
 		MovementInterface.rotate(180, "ccw", 26, RMotor, LMotor);
-		ShovelMotor.rotateTo(200);
-		ShovelMotor.rotateTo(-200);
+		ShovelMotor.rotateTo(180);
+		ShovelMotor.rotateTo(-180);
 		MovementInterface.rotate(180, "ccw", 26, RMotor, LMotor);
 	}
 	public static void drop() {
@@ -52,7 +52,7 @@ public class Client extends Setup{
 				MovementInterface.rotate(1, lastMove, 8, RMotor, LMotor);
 			}
 			
-			lastMove = "ccw";
+			//lastMove = "ccw";
 			
 			OutputStream outputStream = serverSocket.getOutputStream();
 			DataOutputStream dout = new DataOutputStream(outputStream);

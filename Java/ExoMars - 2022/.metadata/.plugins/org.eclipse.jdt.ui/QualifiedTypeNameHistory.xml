@@ -5,7 +5,6 @@
     <fullyQualifiedTypeName name="lejos.hardware.port.AnalogPort"/>
     <fullyQualifiedTypeName name="lejos.hardware.port.SensorPort"/>
     <fullyQualifiedTypeName name="atom_core.EvacuationZone"/>
-    <fullyQualifiedTypeName name="lejos.hardware.Sound"/>
     <fullyQualifiedTypeName name="javax.sound.midi.Soundbank"/>
     <fullyQualifiedTypeName name="java.awt.Button"/>
     <fullyQualifiedTypeName name="java.util.concurrent.Delayed"/>
@@ -15,8 +14,9 @@
     <fullyQualifiedTypeName name="atom_core.MovementInterface"/>
     <fullyQualifiedTypeName name="atom_core.GyroscopeUtils"/>
     <fullyQualifiedTypeName name="atom_core.ColorUtils"/>
-    <fullyQualifiedTypeName name="lejos.utility.Delay"/>
     <fullyQualifiedTypeName name="lejos.hardware.lcd.LCD"/>
     <fullyQualifiedTypeName name="lejos.hardware.Button"/>
     <fullyQualifiedTypeName name="java.io.OutputStream"/>
+    <fullyQualifiedTypeName name="lejos.utility.Delay"/>
+    <fullyQualifiedTypeName name="lejos.hardware.Sound"/>
 </qualifiedTypeNameHistroy>
