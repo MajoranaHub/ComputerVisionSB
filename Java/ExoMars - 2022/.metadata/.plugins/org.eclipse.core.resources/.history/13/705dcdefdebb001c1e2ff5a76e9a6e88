@@ -45,12 +45,12 @@ public class Client extends Setup{
 			if(lastMove.equals("forw")) {
 				//System.out.println(lastMove);
 				LCD.drawString(lastMove, 0, 3);
-				MovementInterface.move(1, lastMove, 8, RMotor, LMotor);
+				MovementInterface.move(1, lastMove, 13, RMotor, LMotor);
 			}
 			else if(lastMove.equals("cw") || lastMove.equals("ccw")) {
 				//System.out.println(lastMove);
 				LCD.drawString(lastMove, 0, 3);
-				MovementInterface.rotate(1, lastMove, 8, RMotor, LMotor);
+				MovementInterface.rotate(1, lastMove, 13, RMotor, LMotor);
 			}
 			
 			//lastMove = "ccw";

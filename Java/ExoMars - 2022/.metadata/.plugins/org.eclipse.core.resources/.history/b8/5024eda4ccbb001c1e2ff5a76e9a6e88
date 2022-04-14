@@ -18,12 +18,12 @@ public class Client extends Setup{
 	
 	public static void grab() {
 		Sound.beepSequenceUp();
-		MovementInterface.rotate(10, "cw", 26, RMotor, LMotor);
+		MovementInterface.rotate(180, "ccw", 26, RMotor, LMotor);
 		MovementInterface.move(10, "back", 26, RMotor, LMotor);
-		MovementInterface.rotate(180, "cw", 26, RMotor, LMotor);
+		MovementInterface.rotate(180, "ccw", 26, RMotor, LMotor);
 		ShovelMotor.rotateTo(200);
 		ShovelMotor.rotateTo(-200);
-		MovementInterface.rotate(90, "ccw", 26, RMotor, LMotor);
+		MovementInterface.rotate(180, "ccw", 26, RMotor, LMotor);
 	}
 	public static void drop() {
 		
@@ -45,15 +45,15 @@ public class Client extends Setup{
 			if(lastMove.equals("forw")) {
 				//System.out.println(lastMove);
 				LCD.drawString(lastMove, 0, 3);
-				MovementInterface.move(1, lastMove, 8, RMotor, LMotor);
+				MovementInterface.move(1, lastMove, 13, RMotor, LMotor);
 			}
 			else if(lastMove.equals("cw") || lastMove.equals("ccw")) {
 				//System.out.println(lastMove);
 				LCD.drawString(lastMove, 0, 3);
-				MovementInterface.rotate(1, lastMove, 8, RMotor, LMotor);
+				MovementInterface.rotate(1, lastMove, 13, RMotor, LMotor);
 			}
 			
-			//lastMove = "ccw";
+			lastMove = "ccw";
 			
 			OutputStream outputStream = serverSocket.getOutputStream();
 			DataOutputStream dout = new DataOutputStream(outputStream);
@@ -64,6 +64,7 @@ public class Client extends Setup{
 			BufferedReader inBuffer = new BufferedReader(new InputStreamReader(serverSocket.getInputStream(), StandardCharsets.UTF_8));
 			
 			if (inBuffer.ready()) {
+				LCD.drawString("reading", 0, 3);
 				inMsg = inBuffer.readLine();
 				LCD.clear();
 				if (inMsg.equals("grab")) grab();

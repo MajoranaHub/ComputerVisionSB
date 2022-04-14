@@ -82,7 +82,7 @@
               <children xsi:type="advanced:Placeholder" xmi:id="_epkzVzGoEeyfd4ancsaEpQ" elementId="org.eclipse.egit.ui.RepositoriesView" toBeRendered="false" ref="_epmCADGoEeyfd4ancsaEpQ"/>
             </children>
             <children xsi:type="basic:PartSashContainer" xmi:id="_epkzWDGoEeyfd4ancsaEpQ" containerData="8424" selectedElement="_epkzWTGoEeyfd4ancsaEpQ" horizontal="true">
-              <children xsi:type="basic:PartSashContainer" xmi:id="_epkzWTGoEeyfd4ancsaEpQ" containerData="8389" selectedElement="_epkzWjGoEeyfd4ancsaEpQ">
+              <children xsi:type="basic:PartSashContainer" xmi:id="_epkzWTGoEeyfd4ancsaEpQ" containerData="8389" selectedElement="_epkzYzGoEeyfd4ancsaEpQ">
                 <children xsi:type="basic:PartSashContainer" xmi:id="_epkzWjGoEeyfd4ancsaEpQ" containerData="4353" selectedElement="_epkzYjGoEeyfd4ancsaEpQ" horizontal="true">
                   <children xsi:type="basic:PartStack" xmi:id="_epkzWzGoEeyfd4ancsaEpQ" elementId="left" containerData="1589" selectedElement="_epkzXjGoEeyfd4ancsaEpQ">
                     <tags>org.eclipse.e4.primaryNavigationStack</tags>
@@ -803,7 +803,7 @@
           <tags>org.eclipse.jdt.ui.CompilationUnitEditor</tags>
         </children>
         <children xsi:type="basic:Part" xmi:id="_9_etgJimEeyzT5J-1243CA" elementId="org.eclipse.e4.ui.compatibility.editor" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityEditor" label="Client.java" iconURI="platform:/plugin/org.eclipse.jdt.ui/icons/full/obj16/jcu_obj.png" closeable="true">
-          <persistedState key="memento" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xD;&#xA;&lt;editor id=&quot;org.eclipse.jdt.ui.CompilationUnitEditor&quot; name=&quot;Client.java&quot; partName=&quot;Client.java&quot; title=&quot;Client.java&quot; tooltip=&quot;atom-core/src/atom_core/Client.java&quot;>&#xD;&#xA;&lt;input factoryID=&quot;org.eclipse.ui.part.FileEditorInputFactory&quot; path=&quot;/atom-core/src/atom_core/Client.java&quot;/>&#xD;&#xA;&lt;editorState selectionHorizontalPixel=&quot;0&quot; selectionLength=&quot;0&quot; selectionOffset=&quot;571&quot; selectionTopPixel=&quot;0&quot;/>&#xD;&#xA;&lt;/editor>"/>
+          <persistedState key="memento" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xD;&#xA;&lt;editor id=&quot;org.eclipse.jdt.ui.CompilationUnitEditor&quot; name=&quot;Client.java&quot; partName=&quot;Client.java&quot; title=&quot;Client.java&quot; tooltip=&quot;atom-core/src/atom_core/Client.java&quot;>&#xD;&#xA;&lt;input factoryID=&quot;org.eclipse.ui.part.FileEditorInputFactory&quot; path=&quot;/atom-core/src/atom_core/Client.java&quot;/>&#xD;&#xA;&lt;editorState selectionHorizontalPixel=&quot;0&quot; selectionLength=&quot;0&quot; selectionOffset=&quot;766&quot; selectionTopPixel=&quot;155&quot;/>&#xD;&#xA;&lt;/editor>"/>
           <tags>Editor</tags>
           <tags>removeOnHide</tags>
           <tags>org.eclipse.jdt.ui.CompilationUnitEditor</tags>
@@ -1047,7 +1047,7 @@
       </children>
       <children xsi:type="menu:ToolBar" xmi:id="_epmCEDGoEeyfd4ancsaEpQ" elementId="org.eclipse.ui.workbench.file">
         <tags>Draggable</tags>
-        <children xsi:type="menu:HandledToolItem" xmi:id="_hxLLcLsmEeynXaVtJH2w0w" elementId="print" visible="false" iconURI="platform:/plugin/org.eclipse.ui/icons/full/etool16/print_edit.png" tooltip="Print" command="_epoe9zGoEeyfd4ancsaEpQ"/>
+        <children xsi:type="menu:HandledToolItem" xmi:id="_FOk_ULvDEeyTo6AmDjpFvQ" elementId="print" visible="false" iconURI="platform:/plugin/org.eclipse.ui/icons/full/etool16/print_edit.png" tooltip="Print" command="_epoe9zGoEeyfd4ancsaEpQ"/>
       </children>
       <children xsi:type="menu:ToolBar" xmi:id="_epmCHTGoEeyfd4ancsaEpQ" elementId="additions" toBeRendered="false">
         <tags>toolbarSeparator</tags>
@@ -1074,7 +1074,7 @@
       </children>
       <children xsi:type="menu:ToolBar" xmi:id="_epmCZTGoEeyfd4ancsaEpQ" elementId="org.eclipse.ui.workbench.navigate">
         <tags>Draggable</tags>
-        <children xsi:type="menu:HandledToolItem" xmi:id="_hxNnsLsmEeynXaVtJH2w0w" elementId="org.eclipse.ui.window.pinEditor" iconURI="platform:/plugin/org.eclipse.ui/icons/full/etool16/pin_editor.png" tooltip="Pin Editor" type="Check" command="_epn4lzGoEeyfd4ancsaEpQ"/>
+        <children xsi:type="menu:HandledToolItem" xmi:id="_FOnbkLvDEeyTo6AmDjpFvQ" elementId="org.eclipse.ui.window.pinEditor" iconURI="platform:/plugin/org.eclipse.ui/icons/full/etool16/pin_editor.png" tooltip="Pin Editor" type="Check" command="_epn4lzGoEeyfd4ancsaEpQ"/>
       </children>
       <children xsi:type="menu:ToolBar" xmi:id="_epmCcTGoEeyfd4ancsaEpQ" elementId="group.editor" toBeRendered="false">
         <tags>toolbarSeparator</tags>
