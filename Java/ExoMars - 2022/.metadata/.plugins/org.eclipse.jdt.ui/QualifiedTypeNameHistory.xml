@@ -9,14 +9,14 @@
     <fullyQualifiedTypeName name="java.awt.Button"/>
     <fullyQualifiedTypeName name="java.util.concurrent.Delayed"/>
     <fullyQualifiedTypeName name="java.lang.String"/>
-    <fullyQualifiedTypeName name="atom_core.UltrasonicUtils"/>
     <fullyQualifiedTypeName name="atom_core.NewEvacuation"/>
     <fullyQualifiedTypeName name="atom_core.MovementInterface"/>
-    <fullyQualifiedTypeName name="atom_core.GyroscopeUtils"/>
-    <fullyQualifiedTypeName name="atom_core.ColorUtils"/>
     <fullyQualifiedTypeName name="lejos.hardware.lcd.LCD"/>
     <fullyQualifiedTypeName name="lejos.hardware.Button"/>
     <fullyQualifiedTypeName name="java.io.OutputStream"/>
     <fullyQualifiedTypeName name="lejos.utility.Delay"/>
     <fullyQualifiedTypeName name="lejos.hardware.Sound"/>
+    <fullyQualifiedTypeName name="atom_core.UltrasonicUtils"/>
+    <fullyQualifiedTypeName name="atom_core.GyroscopeUtils"/>
+    <fullyQualifiedTypeName name="atom_core.ColorUtils"/>
 </qualifiedTypeNameHistroy>

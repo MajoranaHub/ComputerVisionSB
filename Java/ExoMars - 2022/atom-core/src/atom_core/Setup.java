@@ -19,8 +19,8 @@ public class Setup
   static EV3LargeRegulatedMotor RMotor = new EV3LargeRegulatedMotor(MotorPort.D);
   static EV3LargeRegulatedMotor LMotor = new EV3LargeRegulatedMotor(MotorPort.A);
   static EV3LargeRegulatedMotor ShovelMotor = new EV3LargeRegulatedMotor(MotorPort.B);
-  //static EV3MediumRegulatedMotor DropMotor = new EV3MediumRegulatedMotor(MotorPort.C);  --> gara classica
-  static EV3MediumRegulatedMotor colorSensorRotator = new EV3MediumRegulatedMotor(MotorPort.C); // --> gara in "DAD"
+  static EV3MediumRegulatedMotor DropMotor = new EV3MediumRegulatedMotor(MotorPort.C); // --> gara classica
+  //static EV3MediumRegulatedMotor colorSensorRotator = new EV3MediumRegulatedMotor(MotorPort.C); // --> gara in "DAD"
   
   //static NXTCam Pixi = new NXTCam(SensorPort.S2);
   static EV3GyroSensor Gyroscope = new EV3GyroSensor(SensorPort.S3);
@@ -51,8 +51,8 @@ public class Setup
     //Configurazione iniziale dei motori
     RMotor.setSpeed(250);
     LMotor.setSpeed(250);
-    //DropMotor.setSpeed(50); // --> motore gara classica
-    colorSensorRotator.setSpeed(50); // --> motore per gara del 2021
+    DropMotor.setSpeed(50); // --> motore gara classica
+    //colorSensorRotator.setSpeed(50); // --> motore per gara del 2021
     ShovelMotor.setSpeed(300);
     String[] pippo = {"1"};
     

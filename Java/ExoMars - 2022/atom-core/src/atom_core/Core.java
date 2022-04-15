@@ -1,5 +1,6 @@
 package atom_core;
 
+import java.io.IOException;
 import java.util.concurrent.Delayed;
 
 import lejos.hardware.Button;
@@ -295,7 +296,13 @@ class Core
 			 if (silverCount != 6)
 			 {			 
 				 silverCount = 0;
-				 EvacuationZone.play();
+				 //EvacuationZone.play();
+				 try {
+					Client.start();
+				} catch (IOException | InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			 }
 			 silverCount = 0;
 		 }
@@ -411,12 +418,7 @@ class Core
 		 
 		 MovementInterface.rotate(2, "ccw", 26, RMotor, LMotor);
 		 
-		 LCD.clear();
-		 
-		 /* GARA 2021 PISTA CON BORDI ROSSI */
-		 //da questo punto, dopo aver letto verde-verde ed essersi posizionato sulla linea nera, il robot procede fino alla zona
-		 
-		 goToEvacuation();
+		 LCD.clear(); 
   }
   
   
