@@ -1,13 +1,11 @@
 import socket
-import pickle
+import time
 import cv2
 import imutils
 from PIL import Image
+import numpy as np
 
-HSIZE = 10
-
-ballCounter = 0
-evaquationCompleted = False
+evaquationCompleted = True
 
 s = socket.socket()
 s.bind(('10.0.1.4', 1500))
@@ -34,22 +32,23 @@ def trackobject(oggetto):
         blackLower = (12, 0, 0) #da cambiare
         blackUpper = (119, 85, 255) #da cambiare
         mask = cv2.inRange(hsv, blackLower, blackUpper)
-        mask = cv2.erode(mask, None, iterations=2)
-        mask = cv2.dilate(edges, None, iterations=1)
+        erodeKernel = np.ones((10,10), np.uint8)
+        dilateKernel = np.ones((8,8), np.uint8)
+        mask = cv2.erode(mask, erodeKernel, iterations=2)
+        mask = cv2.dilate(mask, dilateKernel, iterations=3)
 
     elif (oggetto == 'line'):
-        greenLower = (12, 0, 0)
-        greenUpper = (119, 85, 255)
+        greenLower = (0, 150, 40) #da cambiare
+        greenUpper = (119, 85, 95) #da cambiare
         mask = cv2.inRange(hsv, greenLower, greenUpper)
-        mask = cv2.erode(mask, None, iterations=2)
-        mask = cv2.dilate(edges, None, iterations=1)
+        erodeKernel = np.ones((10,10), np.uint8)
+        dilateKernel = np.ones((8,8), np.uint8)
+        mask = cv2.erode(mask, erodeKernel, iterations=2)
+        mask = cv2.dilate(mask, dilateKernel, iterations=3)
 
     # construct a mask for the color "green", then perform
     # a series of dilations and erosions to remove any small
     # blobs left in the mask
-    #mask = cv2.inRange(hsv, greenLower, greenUpper)
-    #mask = cv2.erode(mask, None, iterations=2)
-    #mask = cv2.dilate(edges, None, iterations=1)
 
     # find contours in the mask and initialize the current
     # (x, y) center of the ball
@@ -61,22 +60,13 @@ def trackobject(oggetto):
     if len(cnts) > 0:
         # find the largest contour in the mask, then use
         # it to compute the minimum enclosing circle and
-        # centroid
+        # centre
 
-        contour_list = []
-
-        for contour in cnts:
-            approx = cv2.approxPolyDP(contour,0.01*cv2.arcLength(contour,True),True)
-            area = cv2.contourArea(contour)
-            if ((len(approx) > 8) & (len(approx) < 23) & (area > 30) ):
-                contour_list.append(contour)
-        
-        if len(contour_list) > 0:
-            c = max(contour_list, key=cv2.contourArea)
-            ((x, y), radius) = cv2.minEnclosingCircle(c)
-            color = checkcolour(int(x),int(y),copyframe)
-            M = cv2.moments(c)
-            center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
+        c = max(cnts, key=cv2.contourArea)
+        ((x, y), radius) = cv2.minEnclosingCircle(c)
+        color = checkcolour(int(x),int(y),copyframe)
+        M = cv2.moments(c)
+        center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
 
         
 
@@ -86,8 +76,9 @@ def trackobject(oggetto):
             # then update the list of tracked points
             #cv2.circle(frame, (int(x), int(y)), int(radius),
                 #(0, 255, 255), 2)
-            #cv2.circle(frame, center, 5, (0, 0, 255), -1)
-            #cv2.putText(frame,str(int(x))+" "+str(int(y)),center,cv2.FONT_HERSHEY_SIMPLEX,1,color,2,cv2.LINE_AA)
+
+        cv2.circle(frame, center, 5, (0, 0, 255), -1)
+        cv2.putText(frame,str(int(x))+" "+str(int(y)),center,cv2.FONT_HERSHEY_SIMPLEX,1,color,2,cv2.LINE_AA)
 
     #cv2.imshow("frame", frame)
     #cv2.imshow("edges", edges)
@@ -103,24 +94,26 @@ while True:
     print(f"Connection to {address} has been established!")
 
     camera = cv2.VideoCapture(0)
+    startTime = int(time.time())
     
     while True:
         ack = clientsocket.recv(2)
         print(ack)
         if ack == b'ok' :
             
-            if ballCounter < 4:
+            if time.time() - startTime < 60:
                 x, y = trackobject('ball')
                 print(f"x:{x}, y:{y}")
-                print('going to ball')
+                
                 if x > -1 and y > -1:
+                    print('going to ball')
                     if x < 220:
                         msg = 'ccw\n'
                         clientsocket.send(msg.encode('utf-8'))
                     elif x > 420:
                         msg = 'cw\n'
                         clientsocket.send(msg.encode('utf-8'))
-                    elif y < 300:
+                    elif y < 350:
                         msg = 'forw\n'
                         clientsocket.send(msg.encode('utf-8'))
                     else:
@@ -133,36 +126,42 @@ while True:
             elif not(evaquationCompleted):
                 #cerca zona di evaquazione
                 x, y = trackobject('zone')
+                print(f"x:{x}, y:{y}")
+
                 if x != -1 and y != -1:
-                    if x < 250:
-                        msg = 'ccw'
+                    print('going to zone')
+                    if x < 220:
+                        msg = 'ccw\n'
                         clientsocket.send(msg.encode('utf-8'))
-                    elif x > 350:
-                        msg = 'cw'
+                    elif x > 420:
+                        msg = 'cw\n'
                         clientsocket.send(msg.encode('utf-8'))
-                    elif y < 400:
-                        msg = 'forw'
+                    elif y < 350:
+                        msg = 'forw\n'
                         clientsocket.send(msg.encode('utf-8'))
                     else:
-                        msg = 'drop'
+                        msg = 'drop\n'
                         clientsocket.send(msg.encode('utf-8'))
                         evaquationCompleted = False
-                else: clientsocket.send(b'noxy')
+                else: print('noxy')
+
             else:
                 #go to green line
                 x, y = trackobject('line')
+                print(f"x:{x}, y:{y}")
+
                 if x != -1 and y != -1:
-                    if x < 250:
-                        msg = 'ccw'
+                    print('going to line')
+                    if x < 220:
+                        msg = 'ccw\n'
                         clientsocket.send(msg.encode('utf-8'))
-                    elif x > 350:
-                        msg = 'cw'
+                    elif x > 420:
+                        msg = 'cw\n'
                         clientsocket.send(msg.encode('utf-8'))
-                    elif y < 400:
-                        msg = 'forw'
+                    elif y < 350:
+                        msg = 'forw\n'
                         clientsocket.send(msg.encode('utf-8'))
                     else:
-                        msg = 'exit'
+                        msg = 'exit\n'
                         clientsocket.send(msg.encode('utf-8'))
-                else: clientsocket.send(b'noxy')
-            
+                else: print('noxy')
